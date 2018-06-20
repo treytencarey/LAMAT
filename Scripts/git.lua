@@ -65,7 +65,7 @@ function setModalPage(pageNo)
       "git init\n" ..
       "git add " .. openScript:sub( 8 + self:getWorld():len() + 1, openScript:len()) .. "\n" ..
       "git commit -m \"ENTER MESSAGE HERE\"\n" ..
-      "git remote add origin https://" .. modalPages[1].userBox:getText() .. ":" .. modalPages[1].passwordBox:getText() .. "@github.com/treytencarey/test\n" ..
+      "git remote add origin https://" .. modalPages[1].userBox:getText() .. ":" .. modalPages[1].passwordBox:getText() .. "@github.com/treytencarey/LAMAT\n" ..
       "git push origin master"
     )
   end
