@@ -118,7 +118,7 @@ function onButtonPressed(button)
 end
 
 function onSQLReceived(results, id)
-  if id == "allProblems" then
+  if id == "allProblems" and pages[1].elements.listBox:getItemCount() == 0 then
     if operations:arraySize(results) == 0 then
       pages[1].elements.listBox:addItem("No Problems Found")
     else
@@ -132,5 +132,11 @@ function onSQLReceived(results, id)
     pages[modalNo].elements.title:setText(results["Title"][1])
     pages[modalNo].elements.description:setText(results["Description"][1])
     pages[modalNo].elements.cityState:setText(results["Location"][1])
+  end
+end
+
+function onLeftDoubleMouseDown(mouseId)
+  if mouse:getElement(mouseId) == pages[1].elements.listBox and pages[1].elements.listBox:getSelected() >= 0 then
+    onButtonPressed(pages[1].elements.openButton)
   end
 end
