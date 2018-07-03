@@ -49,6 +49,13 @@ function Page:setViewPage()
   self:refreshViewPage()
 end
 
+function makeButton(imgName, x, y, w, h)
+  newButton = CreateButton("", x, y, w, h)
+  newButton:setImage("UI/" .. imgName .. ".png")
+  newButton:setScaleImage(true) 
+  return newButton
+end
+
 function Page:setAddProblemPage(y)
   self:destroy()
 
@@ -59,13 +66,16 @@ function Page:setAddProblemPage(y)
     description = CreateEditBox(5,55,290,70),
     cityState = CreateEditBox(5,130,290,30),
     createButton = CreateButton("Create Problem",5,165,290,30),
-    cancelButton = CreateButton("Cancel",5,200,290,30)
+    --cancelButton = CreateButton("Cancel",5,200,290,30),
+    cancelButton = makeButton("x", 250,0,50,50),
+    validBox = CreateText("",10,10)
   }
 
   self.elements.menu:setMovable(); self.elements.menu:setMovableBoundaries(0-280, 0, 640+280, 480+225)
   self.elements.title:setText("Title")
   self.elements.description:setText("Description"); self.elements.description:setMultiLine(true)
   self.elements.cityState:setText("City, State")
+--  self.elements.validBox:setText("0/0 said problem valid.")
 
   self:formatElements()
 end
@@ -96,7 +106,7 @@ function onButtonPressed(button)
         table.insert(pages, newPage)
         newPage:setAddProblemPage()
       else
-        script:triggerFunction("InsertProblem", "Scripts/Database.lua", page.elements.title:getText(), page.elements.description:getText(), page.elements.cityState:getText())
+        script:triggerFunction("InsertProblem", "Scripts/Database.lua", page.elements.title:getText(), page.elements.description:getText(), page.elements.cityState:getText(), 0)
         if pages[1].elements.listBox:getItemCount() == 1 and pages[1].elements.listBox:getItem(0) == "No Problems Found" then pages[1].elements.listBox:clear(); end
         pages[1].elements.listBox:addItem(page.elements.title:getText())
         page:destroy()
@@ -132,6 +142,8 @@ function onSQLReceived(results, id)
     pages[modalNo].elements.title:setText(results["Title"][1])
     pages[modalNo].elements.description:setText(results["Description"][1])
     pages[modalNo].elements.cityState:setText(results["Location"][1])
+    pages[modalNo].elements.validBox:setText(results["Valid"][1])
+    --validBox:setText("0/0 said problem valid.")
   end
 end
 
@@ -139,4 +151,8 @@ function onLeftDoubleMouseDown(mouseId)
   if mouse:getElement(mouseId) == pages[1].elements.listBox and pages[1].elements.listBox:getSelected() >= 0 then
     onButtonPressed(pages[1].elements.openButton)
   end
+end
+
+function getPages()
+  return pages
 end
