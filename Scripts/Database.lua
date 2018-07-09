@@ -38,7 +38,7 @@ function ViewProblem(Title, page)
   db:ViewProblem(Title, page)
 end
 
-function getAccount(userName, reason)
+function getUserAccount(userName, reason)
   server:getSQL(self.dbFile,
   "SELECT Account, Password FROM Account WHERE Account='" .. userName .. "';",
   reason
