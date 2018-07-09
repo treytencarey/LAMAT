@@ -7,14 +7,12 @@ function Database.new(dbFile)
 end
 
 function Database:CreateProblemsTable()
-  server:getSQL(self.dbFile,
-    "create table Problems ( Account varchar(30), Title varchar(20), Description varchar(250), Location varchar(30) );"
-  )
+  -- Removed. I did this in DB Browser instead.
 end
 
-function Database:InsertProblem(Title, Description, Location)
+function Database:InsertProblem(Title, Category, Description, Latitude, Longitude)
   server:getSQL(self.dbFile,
-    "insert into Problems ( Account, Title, Description, Location ) values ('" .. myAccount .. "', '" .. Title .. "', '" .. Description .. "', '" .. Location .. "');"
+    "insert into Problems ( Account, Title, Category, Description, Latitude, Longitude) values ('" .. myAccount .. "', '" .. Title .. "', '" .. Category .. "','" .. Description .. "', '" .. Latitude  .. "','" .. Longitude .. "');"
   )
 end
 
@@ -40,14 +38,21 @@ function ViewProblem(Title, page)
   db:ViewProblem(Title, page)
 end
 
-function InsertProblem(Title, Description, Location)
-  db:InsertProblem(Title, Description, Location)
+function getAccount(userName, reason)
+  server:getSQL(self.dbFile,
+  "SELECT Account, Password FROM Account WHERE Account='" .. userName .. "';",
+  reason
+  )
+end
+
+function InsertProblem(Title, Category, Description, Latitude, Longitude)
+  db:InsertProblem(Title, Category, Description, Latitude, Longitude)
 end
 
 function onCreated()
   myAccount = self:getAccount()
 
-  db = Database.new("database/problems.db")
+  db = Database.new("database/database.db")
   db:CreateProblemsTable()
   db:GetAllProblems()
 end
