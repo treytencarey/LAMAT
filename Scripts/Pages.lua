@@ -64,20 +64,52 @@ function Page:setAddProblemPage(y)
     overlay = CreateImage("GLOBAL/pixel.png",0,0,0,0),
     title = CreateEditBox(5,20,290,30),
     description = CreateEditBox(5,55,290,70),
-    cityState = CreateEditBox(5,130,290,30),
-    createButton = CreateButton("Create Problem",5,165,290,30),
-    --cancelButton = CreateButton("Cancel",5,200,290,30),
+    city = CreateEditBox(5,130,290,30),
+    State = CreateEditBox(5,170,190,30),
+    createButton = CreateButton("Create Problem",5,200,290,30),
+    coloredButton = CreateButton("Test colored",5,250,290,30),
     cancelButton = makeButton("x", 250,0,50,50),
     validBox = CreateText("",10,10)
   }
+  self.elements.createButton:setImage("UI/subbut.jpg")
+  self.elements.createButton:setScaleImage(true)
 
   self.elements.menu:setMovable(); self.elements.menu:setMovableBoundaries(0-280, 0, 640+280, 480+225)
   self.elements.title:setText("Title")
   self.elements.description:setText("Description"); self.elements.description:setMultiLine(true)
-  self.elements.cityState:setText("City, State")
+  self.elements.city:setText("City")
+  self.elements.State:setText(" State")
 --  self.elements.validBox:setText("0/0 said problem valid.")
 
   self:formatElements()
+  self.elements.cancelButton:bringToFront()
+end
+
+
+function Page:setViewProblemPage(y)
+  self:destroy()
+
+  self.elements = {
+    menu = CreateWindow("Create Problem",0,0,300,245),
+    overlay = CreateImage("GLOBAL/pixel.png",0,0,0,0),
+    title = CreateEditBox(5,20,290,30),
+    description = CreateEditBox(5,55,290,70),
+    city = CreateEditBox(5,130,290,30),
+    State = CreateEditBox(5,170,190,30),
+    cancelButton = makeButton("x", 250,0,50,50),
+  }
+  self.elements.createButton:setImage("UI/subbut.jpg")
+  self.elements.createButton:setScaleImage(true)
+
+  self.elements.menu:setMovable(); self.elements.menu:setMovableBoundaries(0-280, 0, 640+280, 480+225)
+  self.elements.title:setText("Title")
+  self.elements.description:setText("Description"); self.elements.description:setMultiLine(true)
+  self.elements.city:setText("City")
+  self.elements.State:setText(" State")
+--  self.elements.validBox:setText("0/0 said problem valid.")
+
+  self:formatElements()
+  self.elements.cancelButton:bringToFront()
 end
 
 function Page:destroy()
@@ -89,6 +121,7 @@ end
 
 function Page:refreshViewPage()
   self.elements.listBox:clear()
+  self.elements.listBox:addItem("Test hardcoded item")
   script:triggerFunction("GetAllProblems", "Scripts/Database.lua")
 end
 
@@ -99,6 +132,10 @@ function onCreated()
 end
 
 function onButtonPressed(button)
+  if button==pages[1].elements.myIssuesButton then
+    pages[1].elements.listBox:clear()
+    script:triggerFunction("ViewMyProblems", "Scripts/Database.lua", "admin")
+  end
   for i,page in pairs(pages) do
     if button == page.elements.createButton then
       if i == 1 then
@@ -116,19 +153,20 @@ function onButtonPressed(button)
       page:destroy()
     end
     if button == page.elements.refreshButton then
+      pages[1].elements.listBox:clear()
       pages[1]:refreshViewPage()
     end
   end
   if button == pages[1].elements.openButton and pages[1].elements.listBox:getSelected() >= 0 then
     script:triggerFunction("ViewProblem", "Scripts/Database.lua", pages[1].elements.listBox:getSelectedName(), operations:arraySize(pages)+1)
     newPage = Page.new()
-    newPage:setAddProblemPage()
+    newPage:setViewProblemPage()
     table.insert(pages, newPage)
   end
 end
 
 function onSQLReceived(results, id)
-  if id == "allProblems" and pages[1].elements.listBox:getItemCount() == 0 then
+  if id == "allProblems" then
     if operations:arraySize(results) == 0 then
       pages[1].elements.listBox:addItem("No Problems Found")
     else
@@ -155,4 +193,8 @@ end
 
 function getPages()
   return pages
+end
+
+function getTopModal()
+  return pages[operations:arraySize(pages)]
 end
