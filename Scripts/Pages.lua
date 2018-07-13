@@ -98,8 +98,6 @@ function Page:setViewProblemPage(y)
     State = CreateEditBox(5,170,190,30),
     cancelButton = makeButton("x", 250,0,50,50),
   }
-  self.elements.createButton:setImage("UI/subbut.jpg")
-  self.elements.createButton:setScaleImage(true)
 
   self.elements.menu:setMovable(); self.elements.menu:setMovableBoundaries(0-280, 0, 640+280, 480+225)
   self.elements.title:setText("Title")

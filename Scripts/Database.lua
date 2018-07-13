@@ -18,25 +18,29 @@ end
 
 function Database:GetAllProblems()
   server:getSQL(self.dbFile,
-    "select Title from Problems",
+    "select Title from Problem",
     "allProblems"
   )
 end
 
 function Database:ViewProblem(Title, page)
   server:getSQL(self.dbFile,
-    "select * from Problems where Title='" .. Title .. "';",
+    "select * from Problem where Title='" .. Title .. "';",
     "viewProblem" .. tostring(page)
   )
 end
-function Database:ViewProblem(UserId)
+function Database:ViewMyProblems(UserId)
   server:getSQL(self.dbFile,
-    "select * from Problems where Account='" .. UserId .. "';",
+    "select * from Problem where Account='" .. UserId .. "';",
     "allProblems" 
   )
 end
 function GetAllProblems()
   db:GetAllProblems()
+end
+
+function ViewMyProblems(UserId)
+  db:ViewMyProblems(UserId)
 end
 
 function ViewProblem(Title, page)

@@ -6,8 +6,10 @@ function NewRatioBar(x, y, w, h)
   self.y = y
   self.w = w
   self.h = h
-  self.negBar = CreateImage("UI/red_box.png", x, y, w, h)
-  self.posBar = CreateImage("UI/green_box.png", x, y, w, h)
+  self.negBar = CreateImage("GLOBAL/pixel.png", x, y, w, h)
+  self.negBar:setColor(255,0,0,255)
+  self.posBar = CreateImage("GLOBAL/pixel.png", x, y, w, h)
+  self.posBar:setColor(0,255,0,255)
   
   function self:UpdateRatio(r)
     self.posBar:setWidth(self.w * r)

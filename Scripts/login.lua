@@ -52,7 +52,7 @@ function Login:setPassword(pass)
 end
 -- ==================== Beginning of event handlers =============================
 function onCreated()
-  window = CreateWindow("Login", 10, 10, 200, 200)
+  window = CreateWindow("Login", 10, 10, 200, 100)
   unEditBox = CreateEditBox(10, 15, 170, 20)
   pwEditBox = CreateEditBox(10, 40, 170, 20)
   window:addElement(unEditBox)
