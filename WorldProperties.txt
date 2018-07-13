@@ -1,2 +1,0 @@
-RequireLogin = false;
-WorldListed = false;
