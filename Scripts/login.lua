@@ -4,15 +4,15 @@ local loginElements = {}
 loginElements.usr = "Guest"
 loginElements.pass = ""
 loginElements.status = false
-setmetatable(o, {__index = Page})
+setmetatable(o, {__index = Page}) -- Page should probably be Login
 return loginElements
 end
 
 function Login:login(userName, pass )
-script::triggerFunction("getAccount", "Scripts/Database.lua", userName, "Login")
+script:triggerFunction("getAccount", "Scripts/Database.lua", userName, "Login")
 
 -- compare retrieved values to entered values
-if( self.usr == userName && self.password == pass ) then
+if( self.usr == userName and self.password == pass ) then
 -- logged in status is true and account is set, return true
 self.status = true
 return true
@@ -49,7 +49,7 @@ end
 
 function Login:setPassword(pass)
 self.password = pass
-end0
+end
 -- ==================== Beginning of event handlers =============================
 function onCreated()
   user = Login.new()
