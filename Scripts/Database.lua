@@ -29,7 +29,12 @@ function Database:ViewProblem(Title, page)
     "viewProblem" .. tostring(page)
   )
 end
-
+function Database:ViewProblem(UserId)
+  server:getSQL(self.dbFile,
+    "select * from Problems where Account='" .. UserId .. "';",
+    "allProblems" 
+  )
+end
 function GetAllProblems()
   db:GetAllProblems()
 end
