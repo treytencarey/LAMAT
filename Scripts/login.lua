@@ -9,20 +9,10 @@ function Login.new()
 end
 
 function Login:login(userName, pass )
-  script:triggerFunction("getUserAccount", "Scripts/Database.lua", userName, "Login")
+  self.usr = userName
+  self.pass = pass
 
-  -- compare retrieved values to entered values
-  if self.usr == userName and self.password == pass then
-    -- logged in status is true and account is set, return true
-    self.status = true
-    return true
-  else
-    -- failed, reset values and return false
-    -- self.usr = "Guest"
-    self.password = ""
-    self.status = false
-    return false
-  end
+  script:triggerFunction("getUserAccount", "Scripts/Database.lua", userName, "Login")
 end
 
 function Login:logOut()
@@ -37,6 +27,10 @@ function Login:getUserName()
   return self.usr
 end
 
+function Login:getPassword()
+  return self.pass
+end
+
 function Login:getStatus()
   return self.status
 end
@@ -48,6 +42,11 @@ end
 function Login:setPassword(pass)
   self.password = pass
 end
+
+function Login:setStatus(stat)
+  self.status = stat
+end
+
 -- ==================== Beginning of event handlers =============================
 function onCreated()
   user = Login.new()
@@ -56,30 +55,46 @@ function onCreated()
   unEditBox = CreateEditBox(10, 15, 170, 20)
   pwEditBox = CreateEditBox(10, 37, 170, 20)
   loginButton = CreateButton("Login", 10, 60, 60, 20)
-  statusText = CreateText("Test", 0, 82)
+  -- statusText = CreateText("Test", 0, 82)
 
   window:addElement(unEditBox)
   window:addElement(pwEditBox)
   window:addElement(loginButton)
   window:addElement(statusText)
+  window:hide()
 
-  user:login("admin","pass")
+  --user:login("admin","pass")
+  --statusText:setText( user:getUserName() )
 end
 
-function onSQLRecieved(results, id)
-  user:setUserName( "SQL Test" )
-
+function onSQLReceived(results, id)
   if id == "Login" then
-    statusText:setText( user:getUserName() )
     if operations:arraySize(results) == 0 then
-      user:setUserName( results["Account"][1]  )
+      user:setUserName( "Guest" )
       user:setPassword( "" )
     else
-      user:setUserName( results["Account"][1] )
-      user:setPassword( results["Password"][1] )
+      -- compare retrieved values to entered values
+      if user:getUserName() == results["Account"][1] and user:getPassword() == results["Password"][1] then
+        -- logged in status is true and account is set, return true
+        user:setPassword("")
+        user:setStatus(true)
+      else
+        -- failed, reset values and return false
+        user:setUserName("Guest")
+        user:setPassword("")
+        user:setStatus(false)
+      end
     end
-  end
+  end 
 end
 
 function onButtonPressed(button)
+  if button == loginButton then
+    if unEditBox:getText() == "" or pwEditBox:getText() == "" then
+      -- do nothing
+    else
+      user:login( unEditBox:getText(), pwEditBox:getText() )
+      -- statusText:setText(user:getUserName() )
+    end
+  end
 end
