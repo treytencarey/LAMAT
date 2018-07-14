@@ -50,7 +50,14 @@ end
 function Login:setStatus(stat)
   self.status = stat
 end
+-- ==================== Non Object Functions to Access Account =====================
+function getUserName()
+  return user:getUserName()
+end
 
+function getStatus()
+  return user:getStatus()
+end
 -- ==================== Beginning of event handlers =============================
 function onCreated()
   user = Login.new()
