@@ -65,8 +65,8 @@ function Page:setAddProblemPage(y)
     title = CreateEditBox(5,20,290,30),
     description = CreateEditBox(5,55,290,70),
     Latitude = CreateEditBox(5,130,290,30),
-    Longitude = CreateEditBox(5,170,290,30),
-    createButton = CreateButton("Create Problem",5,210,290,30),
+    Longitude = CreateEditBox(5,165,290,30),
+    createButton = CreateButton("Create Problem",5,205,290,55),
     cancelButton = makeButton("x", 250,0,50,50),
     validBox = CreateText("",10,10)
   }
@@ -94,7 +94,7 @@ function Page:setViewProblemPage(y)
     title = CreateEditBox(5,20,290,30),
     description = CreateEditBox(5,55,290,70),
     Latitude = CreateEditBox(5,130,290,30),
-    Longitude = CreateEditBox(5,170,290,30),
+    Longitude = CreateEditBox(5,165,290,30),
     cancelButton = makeButton("x", 250,0,50,50),
   }
 
