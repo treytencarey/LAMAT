@@ -1,5 +1,3 @@
---[[
-script:triggerFunction("onButtonPressed", "Scripts/Pages.lua", viewButton)
 function NewRatioBar(x, y, w, h)
   local self = {}
 
@@ -9,9 +7,9 @@ function NewRatioBar(x, y, w, h)
   self.w = w
   self.h = h
   self.negBar = CreateImage("GLOBAL/pixel.png", x, y, w, h)
-  self.negBar:setColor(255,0,0,255)
+  self.negBar:setColor(224, 68, 37, 255)
   self.posBar = CreateImage("GLOBAL/pixel.png", x, y, w, h)
-  self.posBar:setColor(0,255,0,255)
+  self.posBar:setColor(131, 218, 45, 255)
   
   function self:UpdateRatio(r)
     self.posBar:setWidth(self.w * r)
@@ -21,7 +19,6 @@ function NewRatioBar(x, y, w, h)
  return self
 
 end
---]]
 
 function NewButton(restImg, x, y, w, h)
   local self = {}
@@ -48,6 +45,10 @@ function NewButton(restImg, x, y, w, h)
       self:Toggle()
     end
   end
+  
+  function self:ToggleVis(newVis)
+    self.btn:setVisible(newVis)
+  end
 
   return self
 
@@ -58,19 +59,23 @@ function onCreated()
   downBtn = NewButton("thumbs_down", 550,350,100,100)
 
   probEdit = CreateEditBox(450, 25, 100, 25)
-  accEdit = CreateEditBox(550, 25, 100, 25)
-  displayBtn = CreateButton("Display problem (fill in Account first!!!!!!)",450, 50, 190, 25)
+  displayBtn = CreateButton("Load problem",450, 50, 190, 25)
   testBox = CreateListBox(450, 75, 190, 175)
   ratioBar = NewRatioBar(450, 300, 200, 25)
+  --ratioBar = script:triggerFunction("New", "Scripts/RatioBar.lua", 450, 300, 200, 25)
+  
+
   scoreBox = CreateEditBox( 450, 325, 190, 25)
 
   probID = "0"
-  acc = ""
+  --getStatus
+  --getUserName
+  updateProbAndAcc()
+
   upVotes = "0"
   allVotes = "0"
 
   probEdit:setText("ProblemID")
-  accEdit:setText("Account")
   scoreBox:setText("Score output: ")
 end
 
@@ -84,13 +89,25 @@ function updateScoreBox()
 end
 
 function updateProbAndAcc()
-    acc = accEdit:getText()
+  if script:triggerFunction("getStatus", "Scripts/login.lua") then
+    acc = script:triggerFunction("getUserName", "Scripts/login.lua")
+    testBox:addItem("Logged in as " .. acc)
+upBtn:ToggleVis(true)
+downBtn:ToggleVis(true)
+  else
+    acc = ""
+    testBox:addItem("Not logged in!")
+    testBox:addItem("Please login to vote")
+upBtn:ToggleVis(false)
+downBtn:ToggleVis(false)
+  end
     probID = probEdit:getText()
+  
 end
 
 function updateProblemDisplay()
-    updateProbAndAcc()
     testBox:clear()
+updateProbAndAcc()
     server:getSQL("database/database.db", "select Account, Title from Problem where ID = " .. probID, "displayproblem")
     server:getSQL("database/database.db", "select Upvote from Vote where ProblemID = " .. probID, "displayvotes")
     server:getSQL("database/database.db", "select count(Upvote) from Vote where Upvote = 1 and ProblemID = " .. probID, "upvotes")
@@ -110,6 +127,7 @@ function onButtonPressed(button)
     else
       p = "rest"
     end
+    updateProbAndAcc()
     server:getSQL("database/database.db", "select count(Upvote) from Vote where Account = '" .. acc .. "' and ProblemID = " .. probID, "addvotepos" .. p)
 
   elseif button == downBtn.btn then
@@ -122,6 +140,7 @@ function onButtonPressed(button)
     else
       p = "rest"
     end
+    updateProbAndAcc()
     server:getSQL("database/database.db", "select count(Upvote) from Vote where Account = '" .. acc .. "' and ProblemID = " .. probID, "addvoteneg" .. p)
 
   elseif button == displayBtn then
