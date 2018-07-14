@@ -130,7 +130,10 @@ end
 function onButtonPressed(button)
   if button==pages[1].elements.myIssuesButton then
     pages[1].elements.listBox:clear()
-    script:triggerFunction("ViewMyProblems", "Scripts/Database.lua", "admin")
+
+    if script:triggerFunction("getStatus", "Scripts/login.lua") then
+      script:triggerFunction("ViewMyProblems", "Scripts/Database.lua", script:triggerFunction("getUserName", "Scripts/login.lua"))
+    end
   end
   for i,page in pairs(pages) do
     if button == page.elements.createButton then
