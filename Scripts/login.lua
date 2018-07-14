@@ -55,12 +55,14 @@ function onCreated()
   unEditBox = CreateEditBox(10, 15, 170, 20)
   pwEditBox = CreateEditBox(10, 37, 170, 20)
   loginButton = CreateButton("Login", 10, 60, 60, 20)
+  cancelButton = CreateButton("Cancel", 73, 60, 60, 20)
   -- statusText = CreateText("Test", 0, 82)
 
   window:addElement(unEditBox)
   window:addElement(pwEditBox)
   window:addElement(loginButton)
   window:addElement(statusText)
+  window:addElement(cancelButton)
   window:hide()
 
   --user:login("admin","pass")
@@ -96,5 +98,9 @@ function onButtonPressed(button)
       user:login( unEditBox:getText(), pwEditBox:getText() )
       -- statusText:setText(user:getUserName() )
     end
+  elseif button == cancelButton then
+    unEditBox:setText("")
+    pwEditBox:setText("")
+    window:hide()
   end
 end
