@@ -64,8 +64,8 @@ function Page:setAddProblemPage(y)
     overlay = CreateImage("GLOBAL/pixel.png",0,0,0,0),
     title = CreateEditBox(5,20,290,30),
     description = CreateEditBox(5,55,290,70),
-    city = CreateEditBox(5,130,290,30),
-    State = CreateEditBox(5,170,190,30),
+    Latitude = CreateEditBox(5,130,290,30),
+    Longitude = CreateEditBox(5,170,190,30),
     createButton = CreateButton("Create Problem",5,200,290,30),
     coloredButton = CreateButton("Test colored",5,250,290,30),
     cancelButton = makeButton("x", 250,0,50,50),
@@ -77,8 +77,8 @@ function Page:setAddProblemPage(y)
   self.elements.menu:setMovable(); self.elements.menu:setMovableBoundaries(0-280, 0, 640+280, 480+225)
   self.elements.title:setText("Title")
   self.elements.description:setText("Description"); self.elements.description:setMultiLine(true)
-  self.elements.city:setText("City")
-  self.elements.State:setText(" State")
+  self.elements.Latitude:setText("Latitude")
+  self.elements.Longitude:setText("Longitude")
 --  self.elements.validBox:setText("0/0 said problem valid.")
 
   self:formatElements()
@@ -94,16 +94,16 @@ function Page:setViewProblemPage(y)
     overlay = CreateImage("GLOBAL/pixel.png",0,0,0,0),
     title = CreateEditBox(5,20,290,30),
     description = CreateEditBox(5,55,290,70),
-    city = CreateEditBox(5,130,290,30),
-    State = CreateEditBox(5,170,190,30),
+    Latitude = CreateEditBox(5,130,290,30),
+    Longitude = CreateEditBox(5,170,190,30),
     cancelButton = makeButton("x", 250,0,50,50),
   }
 
   self.elements.menu:setMovable(); self.elements.menu:setMovableBoundaries(0-280, 0, 640+280, 480+225)
   self.elements.title:setText("Title")
   self.elements.description:setText("Description"); self.elements.description:setMultiLine(true)
-  self.elements.city:setText("City")
-  self.elements.State:setText(" State")
+  self.elements.Latitude:setText("Latitude")
+  self.elements.Longitude:setText("Longitude")
 --  self.elements.validBox:setText("0/0 said problem valid.")
 
   self:formatElements()
@@ -119,7 +119,6 @@ end
 
 function Page:refreshViewPage()
   self.elements.listBox:clear()
-  self.elements.listBox:addItem("Test hardcoded item")
   script:triggerFunction("GetAllProblems", "Scripts/Database.lua")
 end
 
@@ -168,6 +167,7 @@ function onSQLReceived(results, id)
     if operations:arraySize(results) == 0 then
       pages[1].elements.listBox:addItem("No Problems Found")
     else
+      pages[1].elements.listBox:clear()
       for i,val in pairs(results["Title"]) do
         pages[1].elements.listBox:addItem(val)
       end
