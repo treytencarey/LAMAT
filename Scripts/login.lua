@@ -4,29 +4,25 @@ function Login.new()
   loginElements.usr = "Guest"
   loginElements.pass = ""
   loginElements.status = false
-  setmetatable(o, {__index = Page}) -- Page should probably be Login
+  setmetatable(loginElements, {__index = Login})
   return loginElements
 end
 
 function Login:login(userName, pass )
-  script:triggerFunction("getAccount", "Scripts/Database.lua", userName, "Login")
+  script:triggerFunction("getUserAccount", "Scripts/Database.lua", userName, "Login")
 
   -- compare retrieved values to entered values
-  if( self.usr == userName and self.password == pass ) then
+  if self.usr == userName and self.password == pass then
     -- logged in status is true and account is set, return true
     self.status = true
     return true
   else
     -- failed, reset values and return false
-    self.usr = "Guest"
+    -- self.usr = "Guest"
     self.password = ""
     self.status = false
     return false
   end
-end
-
-function Login:isLoggedIn()
-  return self.getStatus()
 end
 
 function Login:logOut()
@@ -54,39 +50,36 @@ function Login:setPassword(pass)
 end
 -- ==================== Beginning of event handlers =============================
 function onCreated()
+  user = Login.new()
+
   window = CreateWindow("Login", 10, 10, 200, 100)
   unEditBox = CreateEditBox(10, 15, 170, 20)
   pwEditBox = CreateEditBox(10, 37, 170, 20)
   loginButton = CreateButton("Login", 10, 60, 60, 20)
+  statusText = CreateText("Test", 0, 82)
 
   window:addElement(unEditBox)
   window:addElement(pwEditBox)
   window:addElement(loginButton)
+  window:addElement(statusText)
 
-  user = Login.new()
+  user:login("admin","pass")
 end
 
 function onSQLRecieved(results, id)
-  if id:find("Login") == 1 then
+  user:setUserName( "SQL Test" )
+
+  if id == "Login" then
+    statusText:setText( user:getUserName() )
     if operations:arraySize(results) == 0 then
-      user.setUserName( "" )
-      user.setPassword( "" )
+      user:setUserName( results["Account"][1]  )
+      user:setPassword( "" )
     else
-      user.setUserName( results["Account"][1] )
-      user.setPassword( results["Password"][1] )
+      user:setUserName( results["Account"][1] )
+      user:setPassword( results["Password"][1] )
     end
   end
 end
 
 function onButtonPressed(button)
-  if button == window.elements.loginButton then
-    user.login(window.elements.unEditBox:getText(), window.elements.pwEditBox:getText())
-
-    if user.getStatus() then
-      window.elements.unEditBox:setText("Success! " .. user.getUserName())
-    else
-      statusText = CreateText("Failure", 10,10)
-      window.addElement(statusText)
-    end
-  end
 end

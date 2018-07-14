@@ -1,3 +1,5 @@
+--[[
+script:triggerFunction("onButtonPressed", "Scripts/Pages.lua", viewButton)
 function NewRatioBar(x, y, w, h)
   local self = {}
 
@@ -19,6 +21,7 @@ function NewRatioBar(x, y, w, h)
  return self
 
 end
+--]]
 
 function NewButton(restImg, x, y, w, h)
   local self = {}
@@ -61,7 +64,6 @@ function onCreated()
   ratioBar = NewRatioBar(450, 300, 200, 25)
   scoreBox = CreateEditBox( 450, 325, 190, 25)
 
-  --ratioBar:UpdateRatio(.5)
   probID = "0"
   acc = ""
   upVotes = "0"

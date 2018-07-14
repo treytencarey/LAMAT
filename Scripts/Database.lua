@@ -43,6 +43,17 @@ function Database:createAccount(userName, pass)
   )
 end
 
+function Database:getUserAccount(userName, reason)
+  server:getSQL(self.dbFile,
+  "SELECT Account, Password FROM Account WHERE Account='" .. userName .. "';",
+  reason
+  )
+end
+
+function getUserAccount(userName, reason)
+  db:getUserAccount(userName, reason)
+end
+
 function GetAllProblems()
   db:GetAllProblems()
 end
@@ -53,13 +64,6 @@ end
 
 function ViewProblem(Title, page)
   db:ViewProblem(Title, page)
-end
-
-function getUserAccount(userName, reason)
-  server:getSQL(self.dbFile,
-  "SELECT Account, Password FROM Account WHERE Account='" .. userName .. "';",
-  reason
-  )
 end
 
 function createAccount(userName, pass)
