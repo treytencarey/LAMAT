@@ -34,6 +34,8 @@ function Login:logOut()
   self.status = false
 end
 
+function Login:Register()
+end
 -- =================== Beginning of get and set functions =======================
 function Login:getUserName()
   return self.usr
@@ -54,9 +56,12 @@ end
 function onCreated()
   window = CreateWindow("Login", 10, 10, 200, 100)
   unEditBox = CreateEditBox(10, 15, 170, 20)
-  pwEditBox = CreateEditBox(10, 40, 170, 20)
+  pwEditBox = CreateEditBox(10, 37, 170, 20)
+  loginButton = CreateButton("Login", 10, 60, 60, 20)
+
   window:addElement(unEditBox)
   window:addElement(pwEditBox)
+  window:addElement(loginButton)
 
   user = Login.new()
 end
@@ -69,6 +74,19 @@ function onSQLRecieved(results, id)
     else
       user.setUserName( results["Account"][1] )
       user.setPassword( results["Password"][1] )
+    end
+  end
+end
+
+function onButtonPressed(button)
+  if button == window.elements.loginButton then
+    user.login(window.elements.unEditBox:getText(), window.elements.pwEditBox:getText())
+
+    if user.getStatus() then
+      window.elements.unEditBox:setText("Success! " .. user.getUserName())
+    else
+      statusText = CreateText("Failure", 10,10)
+      window.addElement(statusText)
     end
   end
 end
