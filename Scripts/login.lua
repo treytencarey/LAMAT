@@ -20,7 +20,11 @@ function Login:logOut()
   self.status = false
 end
 
-function Login:Register()
+function Login:register(userName, pass)
+  self.usr = userName
+  self.pass = pass 
+
+  script:triggerFunction("getUserAccount", "Scripts/Database.lua", userName, "regCheck")
 end
 -- =================== Beginning of get and set functions =======================
 function Login:getUserName()
@@ -51,11 +55,12 @@ end
 function onCreated()
   user = Login.new()
 
-  window = CreateWindow("Login", 10, 10, 200, 100)
+  window = CreateWindow("Login", 10, 10, 200, 105)
   unEditBox = CreateEditBox(10, 15, 170, 20)
   pwEditBox = CreateEditBox(10, 37, 170, 20)
   loginButton = CreateButton("Login", 10, 60, 60, 20)
   cancelButton = CreateButton("Cancel", 73, 60, 60, 20)
+  registerButton = CreateButton("Register", 10, 83, 60, 20)
   -- statusText = CreateText("Test", 0, 82)
 
   window:addElement(unEditBox)
@@ -63,6 +68,7 @@ function onCreated()
   window:addElement(loginButton)
   window:addElement(statusText)
   window:addElement(cancelButton)
+  window:addElement(registerButton)
   window:hide()
 
   --user:login("admin","pass")
@@ -87,7 +93,25 @@ function onSQLReceived(results, id)
         user:setStatus(false)
       end
     end
+  elseif id == "regCheck" then
+
+    if operations:arraySize(results) ~= 0 then
+      errorWindow = CreateWindow("Signup Error", 10, 120, 100, 100)
+      regErrButton = CreateButton("Close", 30, 60, 40, 20)
+      regErrText = CreateText("Account Already Taken", 15, 20)
+      
+      errorWindow:addElement(regErrButton)
+      errorWindow:addElement(regErrText)
+      errorWindow:bringToFront()
+    else
+      script:triggerFunction("createAccount", "Scripts/Database.lua", user:getUserName(), user:getPassword())
+      user:setStatus(true)
+    end
   end 
+
+  unEditBox:setText("")
+  pwEditBox:setText("")
+  -- statusText:setText(user:getUserName())
 end
 
 function onButtonPressed(button)
@@ -102,5 +126,16 @@ function onButtonPressed(button)
     unEditBox:setText("")
     pwEditBox:setText("")
     window:hide()
+  elseif button == registerButton then
+    if unEditBox:getText() == "" or pwEditBox:getText() == "" then
+      unEditBox:setText("")
+      pwEditBox:setText("")
+    else
+      user:register( unEditBox:getText(), pwEditBox:getText() )
+    end
+  elseif button == regErrButton then
+    errorWindow:remove()
   end
+
+  --statusText:setText(user:getUserName())
 end
