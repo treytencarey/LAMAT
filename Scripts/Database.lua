@@ -29,12 +29,20 @@ function Database:ViewProblem(Title, page)
     "viewProblem" .. tostring(page)
   )
 end
+
 function Database:ViewMyProblems(UserId)
   server:getSQL(self.dbFile,
-    "select * from Problem where Account='" .. UserId .. "';",
+    "select Title from Problem where Account='" .. UserId .. "';",
     "allProblems" 
   )
 end
+
+function Database:createAccount(userName, pass)
+  server:getSQL(self.dbFile,
+    "insert into Account (Account, Password) values ('" .. userName .. "', '" .. pass .. "');"
+  )
+end
+
 function GetAllProblems()
   db:GetAllProblems()
 end
@@ -52,6 +60,10 @@ function getUserAccount(userName, reason)
   "SELECT Account, Password FROM Account WHERE Account='" .. userName .. "';",
   reason
   )
+end
+
+function createAccount(userName, pass)
+  db:createAccount(userName, pass)
 end
 
 function InsertProblem(Title, Category, Description, Latitude, Longitude)
