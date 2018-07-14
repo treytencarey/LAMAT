@@ -60,13 +60,13 @@ function Page:setAddProblemPage(y)
   self:destroy()
 
   self.elements = {
-    menu = CreateWindow("Create Problem",0,0,280,245),
+    menu = CreateWindow("Create Problem",0,0,300,305),
     overlay = CreateImage("GLOBAL/pixel.png",0,0,0,0),
-    title = CreateEditBox(5,20,290,30),
-    description = CreateEditBox(5,55,290,70),
-    Latitude = CreateEditBox(5,130,290,30),
-    Longitude = CreateEditBox(5,165,290,30),
-    createButton = CreateButton("Create Problem",5,205,290,55),
+    title = CreateEditBox(5,45,290,30),
+    description = CreateEditBox(5,80,290,70),
+    Latitude = CreateEditBox(5,155,290,30),
+    Longitude = CreateEditBox(5,190,290,30),
+    createButton = CreateButton("Create Problem",5,240,290,55),
     cancelButton = makeButton("x", 250,0,50,50),
     validBox = CreateText("",10,10)
   }
