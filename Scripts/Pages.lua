@@ -60,7 +60,7 @@ function Page:setAddProblemPage(y)
   self:destroy()
 
   self.elements = {
-    menu = CreateWindow("Create Problem",0,0,300,245),
+    menu = CreateWindow("Create Problem",0,0,280,245),
     overlay = CreateImage("GLOBAL/pixel.png",0,0,0,0),
     title = CreateEditBox(5,20,290,30),
     description = CreateEditBox(5,55,290,70),
@@ -89,12 +89,12 @@ function Page:setViewProblemPage(y)
   self:destroy()
 
   self.elements = {
-    menu = CreateWindow("Create Problem",0,0,300,245),
+    menu = CreateWindow("View Problem",0,0,300,500),
     overlay = CreateImage("GLOBAL/pixel.png",0,0,0,0),
-    title = CreateEditBox(5,20,290,30),
-    description = CreateEditBox(5,55,290,70),
-    Latitude = CreateEditBox(5,130,290,30),
-    Longitude = CreateEditBox(5,165,290,30),
+    title = CreateEditBox(5,50,290,30),
+    description = CreateEditBox(5,85,290,70),
+    Latitude = CreateEditBox(5,160,290,30),
+    Longitude = CreateEditBox(5,195,290,30),
     cancelButton = makeButton("x", 250,0,50,50),
   }
 
