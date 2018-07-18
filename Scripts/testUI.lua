@@ -11,6 +11,9 @@ end
 function onButtonPressed(button)
   if button == abutton then
     anotherbutton = CreateButton("it works", 400, 400, 100, 100)
+  elseif button == loginButton then
+    window = script:getValue("window", "Scripts/login.lua")
+    window:show()
   end
 end
 

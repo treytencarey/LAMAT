@@ -21,6 +21,16 @@ function NewRatioBar(x, y, w, h)
     self.posBar:setVisible(nv)
   end
 
+  function self:setParent(parent)
+    parent:addElement(self.negBar)
+    parent:addElement(self.posBar)
+  end
+
+  function self:removeParent(parent)
+    parent:removeElement(self.negBar)
+    parent:removeElement(self.posBar)
+  end
+
  return self
 
 end
@@ -60,15 +70,15 @@ function NewButton(restImg, x, y, w, h)
 end
 
 function onCreated()
-  upBtn = NewButton("thumbs_up", 450,350,100,100)
-  downBtn = NewButton("thumbs_down", 550,350,100,100)
-  ratioBar = NewRatioBar(450, 300, 200, 25)
-  scoreBox = CreateEditBox( 450, 325, 190, 25)
+  ratioBar = NewRatioBar(55, 255, 190, 25)
+  upBtn = NewButton("thumbs_up", ratioBar.x,ratioBar.y+50,100,100)
+  downBtn = NewButton("thumbs_down", ratioBar.x+100,upBtn.btn:getY(),100,100)
+  scoreBox = CreateEditBox( ratioBar.x, ratioBar.y+ratioBar.h, 190, 25)
   loggedin = false
   
   --probEdit = CreateEditBox(450, 25, 100, 25)
   --displayBtn = CreateButton("Load problem",450, 50, 190, 25)
-  testBox = CreateListBox(450, 250, 190, 50)
+  testBox = CreateListBox(ratioBar.x, ratioBar.y-25, 190, 50)
   --voteBar = script:triggerFunction("NewRatioBar", "Scripts/RatioBar.lua", "voteBar", 450, 300, 200, 25)
   
 
@@ -106,6 +116,7 @@ function snapToWindow()
 end
 
 function toggleVis(show)
+  if ratioBar.posBar:getParent() == ratioBar.posBar then show = false; end
   if loggedin then
     upBtn:ToggleVis(show)
     downBtn:ToggleVis(show)
@@ -152,6 +163,22 @@ function updateProbAndAcc(pID)
     --probID = probEdit:getText()
 probID = pID
   
+end
+
+function setParent(parent)
+  ratioBar:setParent(parent)
+  parent:addElement(upBtn.btn)
+  parent:addElement(downBtn.btn)
+  parent:addElement(scoreBox)
+  parent:addElement(testBox)
+end
+
+function removeParent(parent)
+  ratioBar:removeParent(parent)
+  parent:removeElement(upBtn.btn)
+  parent:removeElement(downBtn.btn)
+  parent:removeElement(scoreBox)
+  parent:removeElement(testBox)
 end
 
 function getVotesAndDisplay(pID)

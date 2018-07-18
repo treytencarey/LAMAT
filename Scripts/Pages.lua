@@ -104,6 +104,7 @@ function Page:setViewProblemPage(y)
   self.elements.description:setText("Description"); self.elements.description:setMultiLine(true)
   self.elements.Latitude:setText("Latitude")
   self.elements.Longitude:setText("Longitude")
+  script:triggerFunction("setParent", "Scripts/vote.lua", self.elements.menu)
   --script:triggerFunction("toggleVis", "Scripts/vote.lua", true)
 
   self:formatElements()
@@ -150,7 +151,8 @@ function onButtonPressed(button)
       end
     end
     if button == page.elements.cancelButton then
-  script:triggerFunction("toggleVis", "Scripts/vote.lua", false)
+      script:triggerFunction("removeParent", "Scripts/vote.lua", getTopModal().elements.menu)
+      script:triggerFunction("toggleVis", "Scripts/vote.lua", false)
       page:destroy()
     end
     if button == page.elements.refreshButton then
@@ -182,9 +184,10 @@ function onSQLReceived(results, id)
   end
   if id:find("viewProblem") == 1 then
     modalNo = id:sub(12, id:len())+0
-script:triggerFunction("getVotesAndDisplay", "Scripts/vote.lua", results["ID"][1])
---call toggleVis again to show up/down buttons if logged in
+    script:triggerFunction("getVotesAndDisplay", "Scripts/vote.lua", results["ID"][1])
+    --call toggleVis again to show up/down buttons if logged in
     script:triggerFunction("toggleVis", "Scripts/vote.lua", true)
+    
     pages[modalNo].elements.title:setText(results["Title"][1])
     pages[modalNo].elements.description:setText(results["Description"][1])
     --pages[modalNo].elements.cityState:setText(results["Location"][1])

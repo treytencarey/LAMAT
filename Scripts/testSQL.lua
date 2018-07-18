@@ -1,5 +1,5 @@
 function onCreated()
-  testBox = CreateListBox(10, 10, 200, 300)
+  testBox = CreateListBox(10, 150, 200, 200)
   editBox = CreateEditBox(10, 320, 50, 20)
   submitButton = CreateButton("Submit", 10, 350, 50, 20)
 end

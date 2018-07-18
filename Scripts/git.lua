@@ -1,4 +1,8 @@
 function onCreated()
+  if game:isStatic() then
+    script:remove(script:thisName())
+    return
+  end
   gitFuncs = {}
   game:loadScripts("GLOBAL/Scripts/scriptOpen.lua")
 
