@@ -34,26 +34,29 @@ function Page:setViewPage()
   self:destroy()
 
   self.elements = {
-    menu = CreateWindow("View", 0, 0, 220, 700),
-    dropList = CreateDropList(10, 30, 200, 30),
-    listBox = CreateListBox(10, 60, 200, 300),
-    openButton = CreateButton("View Issue", 10, 365, 200, 30),
-    createButton = CreateButton("Create Issue", 10, 400, 200, 30),
-    myIssuesButton = CreateButton("View My Issues", 10, 435, 200, 30),
-    refreshButton = CreateButton("Refresh", 10, 470, 200, 30)
+    menu = CreateWindow("View", 0, 0, 250, 700),
+    --bg = CreateImage("GLOBAL/pixel.png", 0, 0, 250, 700),
+topBar = CreateImage("GLOBAL/pixel.png", 0, 25, 250, 50),
+bottomBar = CreateImage("GLOBAL/pixel.png", 0, 300, 250, 200),
+    --dropList = CreateDropList(10, 75, 200, 30),
+probLabel = CreateListBox(10, 75, 230, 25),
+    listBox = CreateListBox(10, 100, 230, 200),
+    openButton = CreateButton("View Issue", 10, 310, 230, 30),
+refreshButton = makeButton("refresh", 110, 350, 50, 50),
+myIssuesButton = makeButton("my_probs", 10, 350, 100, 50),
+    loginButton = makeButton("login", 25, 25, 100, 50),
+    createButton = makeButton("new_problem", 125, 25, 100, 50),
+credits = CreateImage("UI/credits_style3.png", 25, 400, 200, 100),
+
   }
-
-  self.elements.dropList:addItem("Sort By: Nearest")
-
+  self.elements.probLabel:addItem("Problems:")
+  --self.elements.dropList:addItem("Sort By: Nearest")
+  --self.elements.bg:setColor(237,231,200,255)
+  --self.elements.bg:bringToBack()
+  self.elements.topBar:setColor(56,56,56,255)
+  self.elements.bottomBar:setColor(56,56,56,255)
   self:formatElements()
   self:refreshViewPage()
-end
-
-function makeButton(imgName, x, y, w, h)
-  newButton = CreateButton("", x, y, w, h)
-  newButton:setImage("UI/" .. imgName .. ".png")
-  newButton:setScaleImage(true) 
-  return newButton
 end
 
 function Page:setAddProblemPage(y)
@@ -68,7 +71,6 @@ function Page:setAddProblemPage(y)
     Longitude = CreateEditBox(5,190,290,30),
     createButton = CreateButton("Create Problem",5,240,290,55),
     cancelButton = makeButton("x", 250,0,50,50),
-    validBox = CreateText("",10,10)
   }
   self.elements.createButton:setImage("UI/subbut.jpg")
   self.elements.createButton:setScaleImage(true)
@@ -78,7 +80,6 @@ function Page:setAddProblemPage(y)
   self.elements.description:setText("Description"); self.elements.description:setMultiLine(true)
   self.elements.Latitude:setText("Latitude")
   self.elements.Longitude:setText("Longitude")
---  self.elements.validBox:setText("0/0 said problem valid.")
 
   self:formatElements()
   self.elements.cancelButton:bringToFront()
@@ -89,23 +90,22 @@ function Page:setViewProblemPage(y)
   self:destroy()
 
   self.elements = {
-    menu = CreateWindow("View Problem",0,0,300,500),
+    menu = CreateWindow("View Problem",0,100,300,410),
     overlay = CreateImage("GLOBAL/pixel.png",0,0,0,0),
     title = CreateEditBox(5,50,290,30),
     description = CreateEditBox(5,85,290,70),
     Latitude = CreateEditBox(5,160,290,30),
     Longitude = CreateEditBox(5,195,290,30),
-    cancelButton = makeButton("x", 250,0,50,50),
+    cancelButton = makeButton("x", 250,0,50,50)
   }
 
-  --self.elements.menu:setMovable();
+  self.elements.menu:setMovable();
   self.elements.menu:setMovableBoundaries(0-280, 0, 640+280, 480+225)
   self.elements.title:setText("Title")
   self.elements.description:setText("Description"); self.elements.description:setMultiLine(true)
   self.elements.Latitude:setText("Latitude")
   self.elements.Longitude:setText("Longitude")
   script:triggerFunction("setParent", "Scripts/vote.lua", self.elements.menu)
-  --script:triggerFunction("toggleVis", "Scripts/vote.lua", true)
 
   self:formatElements()
   self.elements.cancelButton:bringToFront()
@@ -123,12 +123,43 @@ function Page:refreshViewPage()
   script:triggerFunction("GetAllProblems", "Scripts/Database.lua")
 end
 
+--~~~~~~~~~~~~~~~~~Button functions~~~~~~~~~~~~~~~~~
+function makeButton(imgName, x, y, w, h)
+  newButton = CreateButton("", x, y, w, h)
+  newButton:setImage("UI/" .. imgName .. ".png")
+  newButton:setScaleImage(true) 
+  return newButton
+end
+
+function togglePress(btn, press)
+
+  if btn:getElementType() ~= "CreateButton" then
+    return true
+  end
+
+  img = btn:getImage()
+  newImg = nil
+  if img == "" then
+    --default button
+return true
+  elseif press then
+    newImg = string.sub(img, 1, -5) .. "_pressed.png"
+  else
+    newImg = string.gsub(img, "_pressed", "")
+  end
+  btn:setImage(newImg)
+end
+--~~~~~~~~~~~~~~~~~On created~~~~~~~~~~~~~~~~~~~~~~~~
+
 function onCreated()
   pages = {}
   pages[1] = Page.new()
   pages[1]:setViewPage()
+  --ref to last button pressed so its img can be changed when pressed/released
+  lastPressed = nil
 end
 
+--~~~~~~~~~~~~~~~~~Mouse functions~~~~~~~~~~~~~~~~~
 function onButtonPressed(button)
   if button==pages[1].elements.myIssuesButton then
     pages[1].elements.listBox:clear()
@@ -165,11 +196,35 @@ function onButtonPressed(button)
     newPage = Page.new()
     newPage:setViewProblemPage()
     table.insert(pages, newPage)
-script:triggerFunction("toggleVis", "Scripts/vote.lua", true)
-script:triggerFunction("snapToWindow", "Scripts/vote.lua")
---script:triggerFunction("getVotesAndDisplay", "Scripts/vote.lua", "0")
+    script:triggerFunction("toggleVis", "Scripts/vote.lua", true)
+    script:triggerFunction("snapToWindow", "Scripts/vote.lua")
+  end
+  if button == pages[1].elements.loginButton then
+    window = script:getValue("window", "Scripts/login.lua")
+    window:show()
   end
 end
+
+function onLeftDoubleMouseDown(mouseId)
+  if mouse:getElement(mouseId) == pages[1].elements.listBox and pages[1].elements.listBox:getSelected() >= 0 then
+    onButtonPressed(pages[1].elements.openButton)
+  end
+end
+
+function onLeftMouseDown(mouseID)
+  lastPressed = mouse:getElement(mouseID)
+  togglePress(lastPressed, true)
+  --[[
+  if mouse:getElement(mouseID) == pages[1].elements.listBox and pages[1].elements.listBox:getSelected() >= 0 then
+    onButtonPressed(pages[1].elements.openButton)
+  end
+  --]]
+end
+
+function onLeftMouseUp(mouseID)
+  togglePress(lastPressed, false)
+end
+--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 function onSQLReceived(results, id)
   if id == "allProblems" then
@@ -190,17 +245,7 @@ function onSQLReceived(results, id)
     
     pages[modalNo].elements.title:setText(results["Title"][1])
     pages[modalNo].elements.description:setText(results["Description"][1])
-    --pages[modalNo].elements.cityState:setText(results["Location"][1])
-    --pages[modalNo].elements.validBox:setText(results["Valid"][1])
-    --script:triggerFunction("updateDisplay", "Scripts/vote.lua", "0")
---results["ID"][1]
 
-  end
-end
-
-function onLeftDoubleMouseDown(mouseId)
-  if mouse:getElement(mouseId) == pages[1].elements.listBox and pages[1].elements.listBox:getSelected() >= 0 then
-    onButtonPressed(pages[1].elements.openButton)
   end
 end
 

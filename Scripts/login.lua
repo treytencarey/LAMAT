@@ -62,12 +62,12 @@ end
 function onCreated()
   user = Login.new()
 
-  window = CreateWindow("Login", 10, 10, 200, 105)
-  unEditBox = CreateEditBox(10, 15, 170, 20)
-  pwEditBox = CreateEditBox(10, 37, 170, 20)
-  loginButton = CreateButton("Login", 10, 60, 60, 20)
-  cancelButton = CreateButton("Cancel", 73, 60, 60, 20)
-  registerButton = CreateButton("Register", 10, 83, 60, 20)
+  window = CreateWindow("Login", 10, 10, 200, 170)
+  unEditBox = CreateEditBox(10, 50, 170, 25)
+  pwEditBox = CreateEditBox(10, 75, 170, 25)
+  loginButton = makeButton("ok", 5, 110, 100, 50)
+  cancelButton = makeButton("x", 150, 0, 50, 50)
+  registerButton = makeButton("register", 95, 110, 100, 50)
   -- statusText = CreateText("Test", 0, 82)
 
   window:addElement(unEditBox)
@@ -146,3 +146,12 @@ function onButtonPressed(button)
 
   --statusText:setText(user:getUserName())
 end
+
+--~~~~~~~~~~~~~~~~~Button functions~~~~~~~~~~~~~~~~~
+function makeButton(imgName, x, y, w, h)
+  newButton = CreateButton("", x, y, w, h)
+  newButton:setImage("UI/" .. imgName .. ".png")
+  newButton:setScaleImage(true) 
+  return newButton
+end
+--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
