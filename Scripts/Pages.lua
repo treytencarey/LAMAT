@@ -98,12 +98,13 @@ function Page:setViewProblemPage(y)
     cancelButton = makeButton("x", 250,0,50,50),
   }
 
-  self.elements.menu:setMovable(); self.elements.menu:setMovableBoundaries(0-280, 0, 640+280, 480+225)
+  --self.elements.menu:setMovable();
+  self.elements.menu:setMovableBoundaries(0-280, 0, 640+280, 480+225)
   self.elements.title:setText("Title")
   self.elements.description:setText("Description"); self.elements.description:setMultiLine(true)
   self.elements.Latitude:setText("Latitude")
   self.elements.Longitude:setText("Longitude")
---  self.elements.validBox:setText("0/0 said problem valid.")
+  --script:triggerFunction("toggleVis", "Scripts/vote.lua", true)
 
   self:formatElements()
   self.elements.cancelButton:bringToFront()
@@ -149,6 +150,7 @@ function onButtonPressed(button)
       end
     end
     if button == page.elements.cancelButton then
+  script:triggerFunction("toggleVis", "Scripts/vote.lua", false)
       page:destroy()
     end
     if button == page.elements.refreshButton then
@@ -161,6 +163,9 @@ function onButtonPressed(button)
     newPage = Page.new()
     newPage:setViewProblemPage()
     table.insert(pages, newPage)
+script:triggerFunction("toggleVis", "Scripts/vote.lua", true)
+script:triggerFunction("snapToWindow", "Scripts/vote.lua")
+--script:triggerFunction("getVotesAndDisplay", "Scripts/vote.lua", "0")
   end
 end
 
@@ -177,11 +182,16 @@ function onSQLReceived(results, id)
   end
   if id:find("viewProblem") == 1 then
     modalNo = id:sub(12, id:len())+0
+script:triggerFunction("getVotesAndDisplay", "Scripts/vote.lua", results["ID"][1])
+--call toggleVis again to show up/down buttons if logged in
+    script:triggerFunction("toggleVis", "Scripts/vote.lua", true)
     pages[modalNo].elements.title:setText(results["Title"][1])
     pages[modalNo].elements.description:setText(results["Description"][1])
-    pages[modalNo].elements.cityState:setText(results["Location"][1])
-    pages[modalNo].elements.validBox:setText(results["Valid"][1])
-    --validBox:setText("0/0 said problem valid.")
+    --pages[modalNo].elements.cityState:setText(results["Location"][1])
+    --pages[modalNo].elements.validBox:setText(results["Valid"][1])
+    --script:triggerFunction("updateDisplay", "Scripts/vote.lua", "0")
+--results["ID"][1]
+
   end
 end
 

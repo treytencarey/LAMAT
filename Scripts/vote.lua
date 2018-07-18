@@ -15,6 +15,11 @@ function NewRatioBar(x, y, w, h)
     self.posBar:setWidth(self.w * r)
     self.percent = r
   end
+  
+  function self:ToggleVis(nv)
+    self.negBar:setVisible(nv)
+    self.posBar:setVisible(nv)
+  end
 
  return self
 
@@ -57,62 +62,106 @@ end
 function onCreated()
   upBtn = NewButton("thumbs_up", 450,350,100,100)
   downBtn = NewButton("thumbs_down", 550,350,100,100)
-
-  probEdit = CreateEditBox(450, 25, 100, 25)
-  displayBtn = CreateButton("Load problem",450, 50, 190, 25)
-  testBox = CreateListBox(450, 75, 190, 175)
   ratioBar = NewRatioBar(450, 300, 200, 25)
-  --ratioBar = script:triggerFunction("New", "Scripts/RatioBar.lua", 450, 300, 200, 25)
-  
-
   scoreBox = CreateEditBox( 450, 325, 190, 25)
+  loggedin = false
+  
+  --probEdit = CreateEditBox(450, 25, 100, 25)
+  --displayBtn = CreateButton("Load problem",450, 50, 190, 25)
+  testBox = CreateListBox(450, 250, 190, 50)
+  --voteBar = script:triggerFunction("NewRatioBar", "Scripts/RatioBar.lua", "voteBar", 450, 300, 200, 25)
+  
 
   probID = "0"
   --getStatus
   --getUserName
-  updateProbAndAcc()
+  updateProbAndAcc("0")
 
   upVotes = "0"
   allVotes = "0"
 
-  probEdit:setText("ProblemID")
+  --probEdit:setText("ProblemID")
   scoreBox:setText("Score output: ")
-end
-
-function updateScoreBox()
-  num = 0
-  scoreBox:setText("Score output: " .. upVotes .. "/" .. allVotes)
-  if allVotes ~= "0" then
-    num = tonumber(upVotes)/tonumber(allVotes)
-  end
-  return num
-end
-
-function updateProbAndAcc()
-  if script:triggerFunction("getStatus", "Scripts/login.lua") then
-    acc = script:triggerFunction("getUserName", "Scripts/login.lua")
-    testBox:addItem("Logged in as " .. acc)
-upBtn:ToggleVis(true)
-downBtn:ToggleVis(true)
-  else
-    acc = ""
-    testBox:addItem("Not logged in!")
-    testBox:addItem("Please login to vote")
-upBtn:ToggleVis(false)
-downBtn:ToggleVis(false)
-  end
-    probID = probEdit:getText()
+  
+  toggleVis(false)
   
 end
 
-function updateProblemDisplay()
-    testBox:clear()
-updateProbAndAcc()
-    server:getSQL("database/database.db", "select Account, Title from Problem where ID = " .. probID, "displayproblem")
-    server:getSQL("database/database.db", "select Upvote from Vote where ProblemID = " .. probID, "displayvotes")
-    server:getSQL("database/database.db", "select count(Upvote) from Vote where Upvote = 1 and ProblemID = " .. probID, "upvotes")
-    server:getSQL("database/database.db", "select count(Upvote) from Vote where Upvote <> 0 and ProblemID = " .. probID, "totalvotes")
-    server:getSQL("database/database.db", "select Upvote from Vote where ProblemID = " .. probID .. " and Account = '" .. acc .. "'", "checkvote")
+function snapToWindow()
+  upBtn.btn:bringToFront()
+  downBtn.btn:bringToFront()
+  ratioBar.negBar:bringToFront()
+  ratioBar.posBar:bringToFront()
+  scoreBox:bringToFront()
+  testBox:bringToFront()
+  
+  --[[
+  upBtn.btn:center()
+  downBtn.btn:center()
+  ratioBar.negBar:bringToFront()
+  ratioBar.posBar:bringToFront()
+  scoreBox:center()
+  testBox:center()
+  --]]
+end
+
+function toggleVis(show)
+  if loggedin then
+    upBtn:ToggleVis(show)
+    downBtn:ToggleVis(show)
+  else
+    upBtn:ToggleVis(false)
+    downBtn:ToggleVis(false)
+  end
+  ratioBar:ToggleVis(show)
+  scoreBox:setVisible(show)
+  testBox:setVisible(show)
+  
+  if show then
+    if loggedin then
+      upBtn:Reset()
+  downBtn:Reset()
+end
+ratioBar:UpdateRatio(1)
+scoreBox:setText("Loading...")
+  end
+  
+end
+
+function updateScoreBox()
+  rat = 0
+  scoreBox:setText("Score output: " .. upVotes .. "/" .. allVotes)
+  if allVotes ~= "0" then
+    rat = tonumber(upVotes)/tonumber(allVotes)
+  end
+  return rat
+end
+
+function updateProbAndAcc(pID)
+  if script:triggerFunction("getStatus", "Scripts/login.lua") then
+ loggedin = true
+    acc = script:triggerFunction("getUserName", "Scripts/login.lua")
+    testBox:addItem("Logged in as " .. acc)
+  else
+    loggedin = false
+    acc = ""
+    testBox:addItem("Not logged in!")
+    testBox:addItem("Please login to vote")
+  end
+    
+    --probID = probEdit:getText()
+probID = pID
+  
+end
+
+function getVotesAndDisplay(pID)
+  testBox:clear()
+  updateProbAndAcc(pID)
+  server:getSQL("database/database.db", "select Account, Title from Problem where ID = " .. probID, "displayproblem")
+  --server:getSQL("database/database.db", "select Upvote from Vote where ProblemID = " .. probID, "displayvotes")
+  server:getSQL("database/database.db", "select count(Upvote) from Vote where Upvote = 1 and ProblemID = " .. probID, "updateupvotes")
+  server:getSQL("database/database.db", "select count(Upvote) from Vote where Upvote <> 0 and ProblemID = " .. probID, "updatetotalvotesandratio")
+  server:getSQL("database/database.db", "select Upvote from Vote where ProblemID = " .. probID .. " and Account = '" .. acc .. "'", "updatevotebutton")
 end
 
 function onButtonPressed(button)
@@ -127,7 +176,7 @@ function onButtonPressed(button)
     else
       p = "rest"
     end
-    updateProbAndAcc()
+    updateProbAndAcc(probID)
     server:getSQL("database/database.db", "select count(Upvote) from Vote where Account = '" .. acc .. "' and ProblemID = " .. probID, "addvotepos" .. p)
 
   elseif button == downBtn.btn then
@@ -140,11 +189,11 @@ function onButtonPressed(button)
     else
       p = "rest"
     end
-    updateProbAndAcc()
+    updateProbAndAcc(probID)
     server:getSQL("database/database.db", "select count(Upvote) from Vote where Account = '" .. acc .. "' and ProblemID = " .. probID, "addvoteneg" .. p)
 
-  elseif button == displayBtn then
-    updateProblemDisplay()
+  --elseif button == displayBtn then
+    --getVotesAndDisplay()
   end
 end
 
@@ -157,24 +206,26 @@ function returnSingle(results)
 end
 
 function onSQLReceived(results, id)
+--[[
   if id == "displayproblem" or id == "displayvotes" then
     testBox:addItem(id)
     for k,v in pairs(results) do
-      --testBox:addItem(tostring(k))
       for i,m in pairs(results[k]) do
         testBox:addItem("  " .. tostring(m))
       end
     end 
+--]]
    
-  elseif id == "upvotes" then
+  if id == "updateupvotes" then
     upVotes = returnSingle(results)
 
-  elseif id == "totalvotes" then
+  elseif id == "updatetotalvotesandratio" then
     allVotes = returnSingle(results)
     newRatio = updateScoreBox()
     ratioBar:UpdateRatio(newRatio)
+    --script:triggerFunction("UpdateRatioBar", "Scripts/RatioBar.lua", "voteBar", 450, 300, 200, 25)
 
-  elseif id == "checkvote" then 
+  elseif id == "updatevotebutton" then 
     upBtn:Reset()
     downBtn:Reset()
 
@@ -186,7 +237,7 @@ function onSQLReceived(results, id)
     end
 
   elseif string.find(id, "addvote") ~= nil then
-    --addvote+(pos/neg for either thumbs up or down button) + (pressed/rest depending is corresponding button was pressed or released)
+    --"addvote" + ("pos"/"neg" for either thumbs up or down button) + ("pressed"/"rest" depending is corresponding button was pressed or released)
     votemsg = string.sub(id, 8)
     btn = string.sub(votemsg, 1, 3)
     state = string.sub(votemsg, 4)
@@ -211,12 +262,12 @@ function onSQLReceived(results, id)
     testBox:addItem("vote: " .. vote)
 
   elseif id == "updatevote" then
-    testBox:addItem("UPDATED!")
-    updateProblemDisplay()
+    --testBox:addItem("UPDATED!")
+    getVotesAndDisplay(probID)
 
   elseif id == "insertvote" then
-    testBox:addItem("INSERTED!")
-    updateProblemDisplay()
+    --testBox:addItem("INSERTED!")
+    getVotesAndDisplay(probID)
   end
 
 end
