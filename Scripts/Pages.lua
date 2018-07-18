@@ -35,28 +35,38 @@ function Page:setViewPage()
 
   self.elements = {
     menu = CreateWindow("View", 0, 0, 250, 700),
-    --bg = CreateImage("GLOBAL/pixel.png", 0, 0, 250, 700),
-topBar = CreateImage("GLOBAL/pixel.png", 0, 25, 250, 50),
-bottomBar = CreateImage("GLOBAL/pixel.png", 0, 300, 250, 200),
-    --dropList = CreateDropList(10, 75, 200, 30),
+--dropList = CreateDropList(10, 75, 200, 30),
+bg = CreateImage("GLOBAL/pixel.png", 0, 0, 250, 700),
+
+loginButton = makeButton("login", 140, 25, 100, 50),
+
+probBG = CreateImage("GLOBAL/pixel.png", 10, 75, 230, 225),
 probLabel = CreateListBox(10, 75, 230, 25),
     listBox = CreateListBox(10, 100, 230, 200),
-    openButton = CreateButton("View Issue", 10, 310, 230, 30),
-refreshButton = makeButton("refresh", 110, 350, 50, 50),
-myIssuesButton = makeButton("my_probs", 10, 350, 100, 50),
-    loginButton = makeButton("login", 25, 25, 100, 50),
-    createButton = makeButton("new_problem", 125, 25, 100, 50),
-credits = CreateImage("UI/credits_style3.png", 25, 400, 200, 100),
 
+    openButton = CreateButton("View Selected Problem", 10, 310, 230, 30),
+    createButton = makeButton("new_problem", 10, 350, 100, 50),
+refreshButton = makeButton("refresh", 100, 350, 50, 50),
+myIssuesButton = makeButton("my_probs", 140, 350, 100, 50),
+credits = CreateImage("UI/credits_style3.png", 25, 390, 200, 100)
   }
   self.elements.probLabel:addItem("Problems:")
   --self.elements.dropList:addItem("Sort By: Nearest")
-  --self.elements.bg:setColor(237,231,200,255)
-  --self.elements.bg:bringToBack()
-  self.elements.topBar:setColor(56,56,56,255)
-  self.elements.bottomBar:setColor(56,56,56,255)
+  self.elements.bg:setColor(56,56,56,255)
+  self.elements.probBG:setColor(249,249,249,255)
   self:formatElements()
   self:refreshViewPage()
+  
+  self.elements.probBG:bringToFront()
+  self.elements.loginButton:bringToFront()
+  self.elements.probLabel:bringToFront()
+  self.elements.listBox:bringToFront()
+  self.elements.openButton:bringToFront()
+  self.elements.createButton:bringToFront()
+  self.elements.refreshButton:bringToFront()
+  self.elements.myIssuesButton:bringToFront()
+  self.elements.credits:bringToFront()
+
 end
 
 function Page:setAddProblemPage(y)
@@ -123,6 +133,17 @@ function Page:refreshViewPage()
   script:triggerFunction("GetAllProblems", "Scripts/Database.lua")
 end
 
+--~~~~~~~~~~~~~~~~~Login functionality~~~~~~~~~~~~~~
+function updateAccess()
+--shows/hides submit problem button based on whether user is logged in or not
+  loggedin = false
+  if script:triggerFunction("getStatus", "Scripts/login.lua") then
+    loggedin = true
+  end
+  pages[1].elements.createButton:setVisible(loggedin)
+  pages[1].elements.myIssuesButton:setVisible(loggedin)
+end
+
 --~~~~~~~~~~~~~~~~~Button functions~~~~~~~~~~~~~~~~~
 function makeButton(imgName, x, y, w, h)
   newButton = CreateButton("", x, y, w, h)
@@ -157,6 +178,7 @@ function onCreated()
   pages[1]:setViewPage()
   --ref to last button pressed so its img can be changed when pressed/released
   lastPressed = nil
+  updateAccess()
 end
 
 --~~~~~~~~~~~~~~~~~Mouse functions~~~~~~~~~~~~~~~~~

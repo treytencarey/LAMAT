@@ -49,6 +49,7 @@ end
 
 function Login:setStatus(stat)
   self.status = stat
+  script:triggerFunction("updateAccess", "Scripts/Pages.lua")
 end
 -- ==================== Non Object Functions to Access Account =====================
 function getUserName()
