@@ -11,10 +11,13 @@ end
 function Login:login(userName, pass )
   self.usr = userName
   self.pass = pass
-
+statusText:setText(" ")
   script:triggerFunction("getUserAccount", "Scripts/Database.lua", userName, "Login")
+  if getStatus() == true then 
+              statusText:setText("Signed in")
+          end
+    
 end
-
 function Login:logOut()
   self.usr = "Guest"
   self.status = false
@@ -53,6 +56,9 @@ function Login:setStatus(stat)
 end
 -- ==================== Non Object Functions to Access Account =====================
 function getUserName()
+  if user == nil then
+    return nil
+  end
   return user:getUserName()
 end
 
@@ -69,7 +75,7 @@ function onCreated()
   loginButton = makeButton("ok", 5, 110, 100, 50)
   cancelButton = makeButton("x", 150, 0, 50, 50)
   registerButton = makeButton("register", 95, 110, 100, 50)
-  -- statusText = CreateText("Test", 0, 82)
+ statusText = CreateText("",10, 15)
 
   window:addElement(unEditBox)
   window:addElement(pwEditBox)
