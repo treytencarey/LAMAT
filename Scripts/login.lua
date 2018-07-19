@@ -14,12 +14,13 @@ function Login:login(userName, pass )
   statusText:setText("")
   script:triggerFunction("getUserAccount", "Scripts/Database.lua", userName, "Login")
   if getStatus() == true then 
-       statusText:setText("Signed in")
+    statusText:setText("Signed in")
   else 
-        if getStatus() == false then 
-             statusText:setText("Login Error")  
-         end
- end
+    -- This should probably be somewhere else.
+    --[[if getStatus() == false then 
+      statusText:setText("Login Error")  
+    end--]]
+  end
 end
 function Login:logOut()
   self.usr = "Guest"
@@ -79,6 +80,7 @@ function onCreated()
   window:center()
   unEditBox = CreateEditBox(10, 50, 170, 25)
   pwEditBox = CreateEditBox(10, 75, 170, 25)
+  pwEditBox:setPasswordBox(true)
   loginButton = makeButton("ok", 5, 110, 100, 50)
   cancelButton = makeButton("x", 150, 0, 50, 50)
   registerButton = makeButton("register", 95, 110, 100, 50)
