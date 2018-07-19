@@ -20,7 +20,7 @@ function Page:formatElements()
     self.elements.menu:center()
   
     for i,element in pairs(self.elements) do
-      if i ~= "menu" and i ~= "overlay" and (element:getParent() == nil or element:getParent() == element) then
+      if i ~= "menu"  and i ~= "overlay" and (element:getParent() == nil or element:getParent() == element) then
         self.elements.menu:addElement(element)
         if self == pages[1] then
           element:setY( element:getY()+88 )
@@ -34,39 +34,31 @@ function Page:setViewPage()
   self:destroy()
 
   self.elements = {
-    menu = CreateWindow("View", 0, 0, 250, 700),
---dropList = CreateDropList(10, 75, 200, 30),
-bg = CreateImage("GLOBAL/pixel.png", 0, 0, 250, 700),
+    menu = CreateImage("GLOBAL/pixel.png", 0, 0, 250, 700),
 
-loginButton = makeButton("login", 140, 25, 100, 50),
+    loginButton = makeButton("login", 140, 25, 100, 50),
 
-probBG = CreateImage("GLOBAL/pixel.png", 10, 75, 230, 225),
-probLabel = CreateListBox(10, 75, 230, 25),
+    probBG = CreateImage("GLOBAL/pixel.png", 10, 75, 230, 225),
+    probLabel = CreateListBox(10, 75, 230, 25),
     listBox = CreateListBox(10, 100, 230, 200),
 
-    openButton = CreateButton("View Selected Problem", 10, 310, 230, 30),
     createButton = makeButton("new_problem", 10, 350, 100, 50),
-refreshButton = makeButton("refresh", 100, 350, 50, 50),
-myIssuesButton = makeButton("my_probs", 140, 350, 100, 50),
-credits = CreateImage("UI/credits_style3.png", 25, 390, 200, 100)
+    refreshButton = makeButton("refresh", 100, 350, 50, 50),
+    myIssuesButton = makeButton("my_probs", 140, 350, 100, 50),
+    openButton = CreateButton("View Selected Problem", 10, 310, 230, 30),
+    credits = CreateImage("UI/credits_style3.png", 25, 390, 200, 100)
   }
   self.elements.probLabel:addItem("Problems:")
   --self.elements.dropList:addItem("Sort By: Nearest")
-  self.elements.bg:setColor(56,56,56,255)
+  self.elements.menu:setColor(56,56,56,255)
   self.elements.probBG:setColor(249,249,249,255)
   self:formatElements()
   self:refreshViewPage()
-  
-  self.elements.probBG:bringToFront()
-  self.elements.loginButton:bringToFront()
-  self.elements.probLabel:bringToFront()
-  self.elements.listBox:bringToFront()
-  self.elements.openButton:bringToFront()
+
+  updateAccess()
   self.elements.createButton:bringToFront()
   self.elements.refreshButton:bringToFront()
   self.elements.myIssuesButton:bringToFront()
-  self.elements.credits:bringToFront()
-
 end
 
 function Page:setAddProblemPage(y)
@@ -77,8 +69,8 @@ function Page:setAddProblemPage(y)
     overlay = CreateImage("GLOBAL/pixel.png",0,0,0,0),
     title = CreateEditBox(5,45,290,30),
     description = CreateEditBox(5,80,290,70),
-    Latitude = CreateEditBox(5,155,290,30),
-    Longitude = CreateEditBox(5,190,290,30),
+    latitude = CreateEditBox(5,155,290,30),
+    longitude = CreateEditBox(5,190,290,30),
     createButton = CreateButton("Create Problem",5,240,290,55),
     cancelButton = makeButton("x", 250,0,50,50),
   }
@@ -88,8 +80,8 @@ function Page:setAddProblemPage(y)
   self.elements.menu:setMovable(); self.elements.menu:setMovableBoundaries(0-280, 0, 640+280, 480+225)
   self.elements.title:setText("Title")
   self.elements.description:setText("Description"); self.elements.description:setMultiLine(true)
-  self.elements.Latitude:setText("Latitude")
-  self.elements.Longitude:setText("Longitude")
+  self.elements.latitude:setText("Latitude")
+  self.elements.longitude:setText("Longitude")
 
   self:formatElements()
   self.elements.cancelButton:bringToFront()
@@ -104,8 +96,8 @@ function Page:setViewProblemPage(y)
     overlay = CreateImage("GLOBAL/pixel.png",0,0,0,0),
     title = CreateEditBox(5,50,290,30),
     description = CreateEditBox(5,85,290,70),
-    Latitude = CreateEditBox(5,160,290,30),
-    Longitude = CreateEditBox(5,195,290,30),
+    latitude = CreateEditBox(5,160,290,30),
+    longitude = CreateEditBox(5,195,290,30),
     cancelButton = makeButton("x", 250,0,50,50)
   }
 
@@ -113,8 +105,8 @@ function Page:setViewProblemPage(y)
   self.elements.menu:setMovableBoundaries(0-280, 0, 640+280, 480+225)
   self.elements.title:setText("Title")
   self.elements.description:setText("Description"); self.elements.description:setMultiLine(true)
-  self.elements.Latitude:setText("Latitude")
-  self.elements.Longitude:setText("Longitude")
+  self.elements.latitude:setText("Latitude")
+  self.elements.longitude:setText("Longitude")
   script:triggerFunction("setParent", "Scripts/vote.lua", self.elements.menu)
 
   self:formatElements()
@@ -137,7 +129,8 @@ end
 function updateAccess()
 --shows/hides submit problem button based on whether user is logged in or not
   loggedin = false
-  if script:triggerFunction("getStatus", "Scripts/login.lua") then
+  status = script:triggerFunction("getStatus", "Scripts/login.lua")
+  if status == true then
     loggedin = true
   end
   pages[1].elements.createButton:setVisible(loggedin)
@@ -146,7 +139,7 @@ end
 
 --~~~~~~~~~~~~~~~~~Button functions~~~~~~~~~~~~~~~~~
 function makeButton(imgName, x, y, w, h)
-  newButton = CreateButton("", x, y, w, h)
+  local newButton = CreateButton("", x, y, w, h)
   newButton:setImage("UI/" .. imgName .. ".png")
   newButton:setScaleImage(true) 
   return newButton
@@ -173,6 +166,9 @@ end
 --~~~~~~~~~~~~~~~~~On created~~~~~~~~~~~~~~~~~~~~~~~~
 
 function onCreated()
+  if pages ~= nil and pages[1] ~= nil then
+    pages[1]:destroy()
+  end
   pages = {}
   pages[1] = Page.new()
   pages[1]:setViewPage()
@@ -197,7 +193,7 @@ function onButtonPressed(button)
         table.insert(pages, newPage)
         newPage:setAddProblemPage()
       else
-        script:triggerFunction("InsertProblem", "Scripts/Database.lua", page.elements.title:getText(), page.elements.description:getText(), page.elements.cityState:getText(), 0)
+        script:triggerFunction("InsertProblem", "Scripts/Database.lua", page.elements.title:getText(), 0, page.elements.description:getText(), page.elements.longitude:getText(), page.elements.latitude:getText())
         if pages[1].elements.listBox:getItemCount() == 1 and pages[1].elements.listBox:getItem(0) == "No Problems Found" then pages[1].elements.listBox:clear(); end
         pages[1].elements.listBox:addItem(page.elements.title:getText())
         page:destroy()
