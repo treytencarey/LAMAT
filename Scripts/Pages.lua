@@ -39,7 +39,7 @@ function Page:setViewPage()
     loginButton = makeButton("login", 140, 25, 100, 50),
 
     probBG = CreateImage("GLOBAL/pixel.png", 10, 75, 230, 225),
-    probLabel = CreateListBox(10, 75, 230, 25),
+    probLabel = CreateText("Problems:", 10, 75, 230, 25),
     listBox = CreateListBox(10, 100, 230, 200),
 
     createButton = makeButton("new_problem", 10, 350, 100, 50),
@@ -48,7 +48,6 @@ function Page:setViewPage()
     openButton = CreateButton("View Selected Problem", 10, 310, 230, 30),
     credits = CreateImage("UI/credits_style3.png", 25, 390, 200, 100)
   }
-  self.elements.probLabel:addItem("Problems:")
   --self.elements.dropList:addItem("Sort By: Nearest")
   self.elements.menu:setColor(56,56,56,255)
   self.elements.probBG:setColor(249,249,249,255)
@@ -267,7 +266,8 @@ function onSQLReceived(results, id)
     
     pages[modalNo].elements.title:setText(results["Title"][1])
     pages[modalNo].elements.description:setText(results["Description"][1])
-
+    pages[modalNo].elements.longitude:setText(results["Longitude"][1])
+    pages[modalNo].elements.latitude:setText(results["Latitude"][1])
   end
 end
 
