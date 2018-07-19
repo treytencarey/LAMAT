@@ -14,9 +14,12 @@ function Login:login(userName, pass )
 statusText:setText(" ")
   script:triggerFunction("getUserAccount", "Scripts/Database.lua", userName, "Login")
   if getStatus() == true then 
-              statusText:setText("Signed in")
-          end
-    
+       statusText:setText("Signed in")
+  else 
+        if getStatus() == false then 
+             statusText:setText("Login Error")  
+         end
+ end
 end
 function Login:logOut()
   self.usr = "Guest"
