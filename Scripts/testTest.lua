@@ -13,12 +13,13 @@ function testLogin()
   script:triggerFunction("onButtonPressed", "Scripts/login.lua", loginMenuLoginButton)
 end
 
-function testViewProblem()
+function testViewProblem(itemNo)
+  itemNo = itemNo or 0
   pages = script:triggerFunction("getPages", "Scripts/Pages.lua")
 
   viewButton = pages[1].elements.openButton
   listBox = pages[1].elements.listBox
-  listBox:setSelected(1)
+  listBox:setSelected(itemNo)
   script:triggerFunction("onButtonPressed", "Scripts/Pages.lua", viewButton)
 end
 
@@ -48,10 +49,12 @@ function testCreateProblem()
   modal.elements.latitude:setText("0")
   modal.elements.longitude:setText("0")
   script:triggerFunction("onButtonPressed", "Scripts/Pages.lua", modal.elements.createButton)
+
+  testViewProblem(listBoxHasItem(pages[1].elements.listBox, "Test #" .. tostring(testNo-1)))
 end
 
 function onCreated()
   --testLogin()
 
-  --testCreateProblem()
+  testCreateProblem()
 end
