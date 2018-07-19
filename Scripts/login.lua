@@ -11,7 +11,7 @@ end
 function Login:login(userName, pass )
   self.usr = userName
   self.pass = pass
-statusText:setText(" ")
+  statusText:setText("")
   script:triggerFunction("getUserAccount", "Scripts/Database.lua", userName, "Login")
   if getStatus() == true then 
        statusText:setText("Signed in")
@@ -72,7 +72,11 @@ end
 function onCreated()
   user = Login.new()
 
+  overlay = CreateImage("GLOBAL/pixel.png", 0, 0, 640, 480)
+  overlay:setColor(155,155,155,190)
   window = CreateWindow("Login", 10, 10, 200, 170)
+  window:setMovable(true); window:setMovableBoundaries(0-window:getWidth()+40, 0, 640+window:getWidth()-40, 480+window:getHeight()-40)
+  window:center()
   unEditBox = CreateEditBox(10, 50, 170, 25)
   pwEditBox = CreateEditBox(10, 75, 170, 25)
   loginButton = makeButton("ok", 5, 110, 100, 50)
@@ -87,6 +91,7 @@ function onCreated()
   window:addElement(cancelButton)
   window:addElement(registerButton)
   window:hide()
+  overlay:hide()
 
   --user:login("admin","pass")
   --statusText:setText( user:getUserName() )
@@ -103,6 +108,7 @@ function onSQLReceived(results, id)
         -- logged in status is true and account is set, return true
         user:setPassword("")
         user:setStatus(true)
+        onButtonPressed(cancelButton)
       else
         -- failed, reset values and return false
         user:setUserName("Guest")
@@ -143,6 +149,7 @@ function onButtonPressed(button)
     unEditBox:setText("")
     pwEditBox:setText("")
     window:hide()
+    overlay:hide()
   elseif button == registerButton then
     if unEditBox:getText() == "" or pwEditBox:getText() == "" then
       unEditBox:setText("")

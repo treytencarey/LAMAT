@@ -73,7 +73,9 @@ function onCreated()
   ratioBar = NewRatioBar(55, 255, 190, 25)
   upBtn = NewButton("thumbs_up", ratioBar.x,ratioBar.y+50,100,100)
   downBtn = NewButton("thumbs_down", ratioBar.x+100,upBtn.btn:getY(),100,100)
-  scoreBox = CreateEditBox( ratioBar.x, ratioBar.y+ratioBar.h, 190, 25)
+  scoreBox = CreateImage( "GLOBAL/pixel.png", ratioBar.x, ratioBar.y+ratioBar.h, 190, 25)
+  scoreText = CreateText("", 0,0,scoreBox:getWidth(),scoreBox:getHeight()); scoreText:setTextAlignment("left","center")
+  scoreBox:addElement(scoreText)
   loggedin = false
   
   --probEdit = CreateEditBox(450, 25, 100, 25)
@@ -91,7 +93,7 @@ function onCreated()
   allVotes = "0"
 
   --probEdit:setText("ProblemID")
-  scoreBox:setText("Score output: ")
+  scoreText:setText("Score output: ")
   
   toggleVis(false)
   
@@ -141,7 +143,7 @@ end
 
 function updateScoreBox()
   rat = 0
-  scoreBox:setText("Score output: " .. upVotes .. "/" .. allVotes)
+  scoreText:setText("Score output: " .. upVotes .. "/" .. allVotes)
   if allVotes ~= "0" then
     rat = tonumber(upVotes)/tonumber(allVotes)
   end
@@ -149,9 +151,9 @@ function updateScoreBox()
 end
 
 function updateProbAndAcc(pID)
-  if script:triggerFunction("getStatus", "Scripts/login.lua") then
- loggedin = true
-    acc = script:triggerFunction("getUserName", "Scripts/login.lua")
+  acc = script:triggerFunction("getUserName", "Scripts/login.lua")
+  if script:triggerFunction("getStatus", "Scripts/login.lua") and acc ~= nil then
+    loggedin = true
     testBox:addItem("Logged in as " .. acc)
   else
     loggedin = false

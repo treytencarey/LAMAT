@@ -220,6 +220,10 @@ function onButtonPressed(button)
   if button == pages[1].elements.loginButton then
     window = script:getValue("window", "Scripts/login.lua")
     window:show()
+    overlay = script:getValue("overlay", "Scripts/login.lua")
+    overlay:show()
+    overlay:bringToFront()
+    window:bringToFront()
   end
 end
 

@@ -1,3 +1,4 @@
+--[[
 function onCreated()
   testBox = CreateListBox(10, 150, 200, 200)
   editBox = CreateEditBox(10, 320, 50, 20)
@@ -20,3 +21,4 @@ function onSQLReceived(results, id)
     end
   end
 end
+--]]
