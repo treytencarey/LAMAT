@@ -11,8 +11,12 @@ function Database:CreateProblemsTable()
 end
 
 function Database:InsertProblem(Title, Category, Description, Latitude, Longitude)
+  loggedIn = script:triggerFunction("getStatus", "Scripts/login.lua")
+  if loggedIn == nil or loggedIn == false then return; end
+  userName = script:triggerFunction("getUserName", "Scripts/login.lua")
+
   server:getSQL(self.dbFile,
-    "insert into Problems ( Account, Title, Category, Description, Latitude, Longitude) values ('" .. myAccount .. "', '" .. Title .. "', '" .. Category .. "','" .. Description .. "', '" .. Latitude  .. "','" .. Longitude .. "');"
+    "insert into Problem ( Account, Title, Category, Description, Latitude, Longitude) values ('" .. userName .. "', '" .. Title .. "', '" .. Category .. "','" .. Description .. "', '" .. Latitude  .. "','" .. Longitude .. "');"
   )
 end
 
