@@ -37,7 +37,7 @@ function Page:setViewPage()
     menu = CreateImage("GLOBAL/pixel.png", 0, 0, 250, 700),
 
     loginButton = makeButton("login", 140, 25, 100, 50),
-
+    logoutButton = makeButton("logout", 140, 25, 100, 50),
     probBG = CreateImage("GLOBAL/pixel.png", 10, 75, 230, 225),
     probLabel = CreateText("Problems:", 10, 75, 230, 25),
     listBox = CreateListBox(10, 100, 230, 200),
@@ -134,6 +134,13 @@ function updateAccess()
   end
   pages[1].elements.createButton:setVisible(loggedin)
   pages[1].elements.myIssuesButton:setVisible(loggedin)
+ if status == true then
+ pages[1].elements.loginButton:setVisible(false)
+ pages[1].elements.logoutButton:setVisible(true)
+else
+ pages[1].elements.loginButton:setVisible(true)
+ pages[1].elements.logoutButton:setVisible(false)
+end
 end
 
 --~~~~~~~~~~~~~~~~~Button functions~~~~~~~~~~~~~~~~~
@@ -185,6 +192,11 @@ function onButtonPressed(button)
       script:triggerFunction("ViewMyProblems", "Scripts/Database.lua", script:triggerFunction("getUserName", "Scripts/login.lua"))
     end
   end
+
+  if button==pages[1].elements.logoutButton then()
+     script:triggerFunction("logOut", "Scripts/login.lua") 
+ end
+
   for i,page in pairs(pages) do
     if button == page.elements.createButton then
       if i == 1 then
