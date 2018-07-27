@@ -187,12 +187,13 @@ end
 function onButtonPressed(button)
   if button==pages[1].elements.myIssuesButton then
     pages[1].elements.listBox:clear()
-
     if script:triggerFunction("getStatus", "Scripts/login.lua") then
       script:triggerFunction("ViewMyProblems", "Scripts/Database.lua", script:triggerFunction("getUserName", "Scripts/login.lua"))
     end
   end
-
+  if button == page.elements.logoutButton then
+     script:triggerFunction("setStatus", "Scripts/login.lua", false) 
+ end
   
      for i,page in pairs(pages) do
     if button == page.elements.createButton then
@@ -212,10 +213,6 @@ function onButtonPressed(button)
       script:triggerFunction("toggleVis", "Scripts/vote.lua", false)
       page:destroy()
     end 
-
- if button == page.elements.logoutButton then
-     script:triggerFunction("logOut", "Scripts/login.lua") 
- end
 
     if button == page.elements.refreshButton then
       pages[1].elements.listBox:clear()
