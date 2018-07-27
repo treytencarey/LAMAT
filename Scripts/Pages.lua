@@ -193,11 +193,8 @@ function onButtonPressed(button)
     end
   end
 
-  if button==pages[1].elements.logoutButton then()
-     script:triggerFunction("logOut", "Scripts/login.lua") 
- end
-
-  for i,page in pairs(pages) do
+  
+     for i,page in pairs(pages) do
     if button == page.elements.createButton then
       if i == 1 then
         newPage = Page.new()
@@ -214,7 +211,12 @@ function onButtonPressed(button)
       script:triggerFunction("removeParent", "Scripts/vote.lua", getTopModal().elements.menu)
       script:triggerFunction("toggleVis", "Scripts/vote.lua", false)
       page:destroy()
-    end
+    end 
+
+ if button == page.elements.logoutButton then
+     script:triggerFunction("logOut", "Scripts/login.lua") 
+ end
+
     if button == page.elements.refreshButton then
       pages[1].elements.listBox:clear()
       pages[1]:refreshViewPage()
