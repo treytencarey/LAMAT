@@ -192,12 +192,13 @@ function onButtonPressed(button)
     end
   end
  --if button == page.elements.logoutButton then
---  script:triggerFunction("logOut", "Scripts/login.lua)
--- updateAccess()
--- end
---if button == page.elements.logoutButton then
---  script:triggerFunction("setStatus", "Scripts/login.lua", false) 
--- end
+ --script:triggerFunction("logOut", "Scripts/login.lua)
+ --updateAccess()
+ --end
+if button == pages[1].elements.logoutButton then
+  script:triggerFunction("setStatus", "Scripts/login.lua", false)
+end
+
      for i,page in pairs(pages) do
     if button == page.elements.createButton then
       if i == 1 then
