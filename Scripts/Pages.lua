@@ -238,11 +238,10 @@ end
   if button == pages[2].elements.updateButton then
      script:triggerFunction("UpdateProblem", "Scripts/Database.lua", pages[2].elements.title:getText(), pages[2].elements.description:getText())
      newPage = Page.new()
-     newPage:setAddProblemPage
-    table.insert(pages, newPage)
-    table.insert(pages, newPage)
-
+     newPage:setAddProblemPage()
+     table.insert(pages, newPage)
   end
+
   if button == pages[1].elements.loginButton then
     window = script:getValue("window", "Scripts/login.lua")
     window:show()
