@@ -9,7 +9,14 @@ end
 function Database:CreateProblemsTable()
   -- Removed. I did this in DB Browser instead.
 end
-
+function Database:UpdateProblem(Title,Description)
+  loggedIn = script:triggerFunction("getStatus", "Scripts/login.lua")
+  if loggedIn == nil or loggedIn == false then return; end
+  userName = script:triggerFunction("getUserName", "Scripts/login.lua")
+  server:getSQL(self.dbFile,
+    "update Problem SET Description= '" .. Description .. "' WHERE ACCOUNT = '" .. userName .. "' AND Title = '" .. Title .. "';"
+  )
+end
 function Database:InsertProblem(Title, Category, Description, Latitude, Longitude)
   loggedIn = script:triggerFunction("getStatus", "Scripts/login.lua")
   if loggedIn == nil or loggedIn == false then return; end
@@ -69,7 +76,9 @@ end
 function ViewProblem(Title, page)
   db:ViewProblem(Title, page)
 end
-
+function UpdateProblem(Title, Description)
+  db:UpdateProblem(Title, Description)
+end
 function createAccount(userName, pass)
   db:createAccount(userName, pass)
 end
@@ -77,7 +86,6 @@ end
 function InsertProblem(Title, Category, Description, Latitude, Longitude)
   db:InsertProblem(Title, Category, Description, Latitude, Longitude)
 end
-
 function onCreated()
   myAccount = self:getAccount()
 
