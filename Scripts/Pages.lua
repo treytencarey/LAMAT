@@ -97,7 +97,9 @@ function Page:setViewProblemPage(y)
     description = CreateEditBox(5,85,290,70),
     latitude = CreateEditBox(5,160,290,30),
     longitude = CreateEditBox(5,195,290,30),
-    cancelButton = makeButton("x", 250,0,50,50)
+    cancelButton = makeButton("x", 250,0,50,50),
+ updateButton = CreateButton("Edit Problem", 100,0,50,50)
+
   }
 
   self.elements.menu:setMovable();
@@ -110,6 +112,7 @@ function Page:setViewProblemPage(y)
 
   self:formatElements()
   self.elements.cancelButton:bringToFront()
+
 end
 
 function Page:destroy()
@@ -230,6 +233,15 @@ end
     table.insert(pages, newPage)
     script:triggerFunction("toggleVis", "Scripts/vote.lua", true)
     script:triggerFunction("snapToWindow", "Scripts/vote.lua")
+  end
+
+  if button == pages[2].elements.updateButton then
+     script:triggerFunction("UpdateProblem", "Scripts/Database.lua", pages[2].elements.title:getText(), pages[2].elements.description:getText())
+     newPage = Page.new()
+     newPage:setAddProblemPage
+    table.insert(pages, newPage)
+    table.insert(pages, newPage)
+
   end
   if button == pages[1].elements.loginButton then
     window = script:getValue("window", "Scripts/login.lua")
