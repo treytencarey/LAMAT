@@ -194,10 +194,7 @@ function onButtonPressed(button)
       script:triggerFunction("ViewMyProblems", "Scripts/Database.lua", script:triggerFunction("getUserName", "Scripts/login.lua"))
     end
   end
- --if button == page.elements.logoutButton then
- --script:triggerFunction("logOut", "Scripts/login.lua)
- --updateAccess()
- --end
+ 
 if button == pages[1].elements.logoutButton then
   script:triggerFunction("setStatus", "Scripts/login.lua", false)
 end
@@ -234,8 +231,7 @@ end
     script:triggerFunction("toggleVis", "Scripts/vote.lua", true)
     script:triggerFunction("snapToWindow", "Scripts/vote.lua")
   end
-
-  if button == pages[2].elements.updateButton then
+ if button == pages[2].elements.updateButton then
      script:triggerFunction("UpdateProblem", "Scripts/Database.lua", pages[2].elements.title:getText(), pages[2].elements.description:getText())
      newPage = Page.new()
      newPage:setAddProblemPage()
