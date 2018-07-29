@@ -98,8 +98,7 @@ function Page:setViewProblemPage(y)
     latitude = CreateEditBox(5,160,290,30),
     longitude = CreateEditBox(5,195,290,30),
     cancelButton = makeButton("x", 250,0,50,50),
- updateButton = CreateButton("Edit Problem", 100,0,50,50)
-
+    updateButton = CreateButton("Edit Description", 110,15,50,30)
   }
 
   self.elements.menu:setMovable();
@@ -243,9 +242,9 @@ end
     overlay:bringToFront()
     window:bringToFront()
   end
-  if button == pages[2].elements.updateButton then
-        script:triggerFunction("UpdateProblem", "Scripts/Database.lua", pages[2].elements.title:getText(), pages[2].elements.description:getText())
-        page[2]:destroy()
+  if button == getTopModal().elements.updateButton then
+        script:triggerFunction("UpdateProblem", "Scripts/Database.lua", getTopModal().elements.title:getText(), getTopModal().elements.description:getText())
+        getTopModal():destroy()
         window:bringToFront()
   end
 end
