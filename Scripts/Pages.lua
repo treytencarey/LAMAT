@@ -71,7 +71,7 @@ function Page:setAddProblemPage(y)
     latitude = CreateEditBox(5,155,290,30),
     longitude = CreateEditBox(5,190,290,30),
     createButton = CreateButton("Create Problem",5,240,290,55),
-    cancelButton = makeButton("x", 250,0,50,50),
+    cancelButton = makeButton("x", 250,0,50,50)
   }
   self.elements.createButton:setImage("UI/subbut.jpg")
   self.elements.createButton:setScaleImage(true)
@@ -112,6 +112,7 @@ function Page:setViewProblemPage(y)
 
   self:formatElements()
   self.elements.cancelButton:bringToFront()
+self.elements.updateButton:bringToFront()
 
 end
 
@@ -181,6 +182,7 @@ function onCreated()
   pages = {}
   pages[1] = Page.new()
   pages[1]:setViewPage()
+
   --ref to last button pressed so its img can be changed when pressed/released
   lastPressed = nil
   updateAccess()
@@ -232,12 +234,7 @@ end
     script:triggerFunction("toggleVis", "Scripts/vote.lua", true)
     script:triggerFunction("snapToWindow", "Scripts/vote.lua")
   end
---    if button == pages[2].elements.updateButton then
---     script:triggerFunction("UpdateProblem", "Scripts/Database.lua", pages[2].elements.title:getText(), pages[2].elements.description:getText())
---     newPage = Page.new()
---     newPage:setAddProblemPage()
---    table.insert(pages, newPage)
---  end
+  
    if button == pages[1].elements.loginButton then
     window = script:getValue("window", "Scripts/login.lua")
     window:show()
@@ -246,8 +243,12 @@ end
     overlay:bringToFront()
     window:bringToFront()
   end
+  if button == pages[2].elements.updateButton then
+        script:triggerFunction("UpdateProblem", "Scripts/Database.lua", pages[2].elements.title:getText(), pages[2].elements.description:getText())
+        page[2]:destroy()
+        window:bringToFront()
+  end
 end
-
 function onLeftDoubleMouseDown(mouseId)
   if mouse:getElement(mouseId) == pages[1].elements.listBox and pages[1].elements.listBox:getSelected() >= 0 then
     onButtonPressed(pages[1].elements.openButton)
