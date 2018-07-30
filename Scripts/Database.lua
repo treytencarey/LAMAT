@@ -34,6 +34,20 @@ function Database:GetAllProblems()
   )
 end
 
+function Database:GetProblemsByCategory(cat)
+  local code = ""
+  if cat == 0 then code = "misc"
+  elseif cat == 1 then code = "maint"
+  elseif cat == 2 then code = "hazard"
+  elseif cat == 3 then code = "aesth"
+  end
+
+  server:getSQL(self.dbFile,
+    "select Title from Problem where Category='" .. cat .. "';",
+    code
+  )
+end
+
 function Database:ViewProblem(Title, page)
   server:getSQL(self.dbFile,
     "select * from Problem where Title='" .. Title .. "';",
@@ -67,6 +81,10 @@ end
 
 function GetAllProblems()
   db:GetAllProblems()
+end
+
+function GetProblemsByCategory(cat)
+  db:GetProblemsByCategory(cat)
 end
 
 function ViewMyProblems(UserId)
