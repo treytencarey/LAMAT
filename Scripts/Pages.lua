@@ -1,4 +1,5 @@
 local Page = {}
+local MISC, MAINT, HAZARD, AESTH = 0, 1, 2, 3
 function Page.new()
   local o = {}
   o.currPage=""
@@ -39,7 +40,8 @@ function Page:setViewPage()
     loginButton = makeButton("login", 140, 25, 100, 50),
     logoutButton = makeButton("logout", 140, 25, 100, 50),
     probBG = CreateImage("GLOBAL/pixel.png", 10, 75, 230, 225),
-    probLabel = CreateText("Problems:", 10, 75, 230, 25),
+    --probLabel = CreateText("Problems:", 10, 75, 230, 25),
+    proFilter = CreateDropList(10, 75, 230, 25),
     listBox = CreateListBox(10, 100, 230, 200),
 
     createButton = makeButton("new_problem", 10, 350, 100, 50),
@@ -49,6 +51,11 @@ function Page:setViewPage()
     credits = CreateImage("UI/credits_style3.png", 25, 390, 200, 100)
   }
   --self.elements.dropList:addItem("Sort By: Nearest")
+  self.elements.proFilter:addItem("Filter By: Misc")
+  self.elements.proFilter:addItem("Filter By: Maintanence")
+  self.elements.proFilter:addItem("Filter By: Hazard")
+  self.elements.proFilter:addItem("Filter By: Aesthetic")
+
   self.elements.menu:setColor(56,56,56,255)
   self.elements.probBG:setColor(249,249,249,255)
   self:formatElements()
