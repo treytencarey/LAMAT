@@ -69,31 +69,59 @@ end
 function getStatus()
   return user:getStatus()
 end
+
+function setStatus(status)
+  user:setStatus(status)
+end
 -- ==================== Beginning of event handlers =============================
 function onCreated()
   user = Login.new()
 
   overlay = CreateImage("GLOBAL/pixel.png", 0, 0, 640, 480)
   overlay:setColor(155,155,155,190)
-  window = CreateWindow("Login", 10, 10, 200, 170)
+  window = CreateWindow("Login", 10, 10, 250, 170)
   window:setMovable(true); window:setMovableBoundaries(0-window:getWidth()+40, 0, 640+window:getWidth()-40, 480+window:getHeight()-40)
   window:center()
-  unEditBox = CreateEditBox(10, 50, 170, 25)
-  pwEditBox = CreateEditBox(10, 75, 170, 25)
+
+  loginBG = CreateImage("GLOBAL/pixel.png", 0, 0, 250, 120)
+  barBG = CreateImage("GLOBAL/pixel.png", 0, 120, 250, 50)
+  userLbl = CreateText("Username", 25, 10, 75, 25)
+  passLbl = CreateText("Password", 25, 60, 75, 25)
+  unEditBox = CreateEditBox(25, 25, 170, 25)
+  pwEditBox = CreateEditBox(25, 75, 170, 25)
   pwEditBox:setPasswordBox(true)
-  loginButton = makeButton("ok", 5, 110, 100, 50)
-  cancelButton = makeButton("x", 150, 0, 50, 50)
-  registerButton = makeButton("register", 95, 110, 100, 50)
+  loginButton = makeButton("ok", 5, 115, 100, 50)
+  registerButton = makeButton("register", 95, 115, 100, 50)
+  cancelButton = makeButton("x", 200, 115, 50, 50)
+  --logginginLbl = CreateText("Logging in...", 10, 170, 100, 25)
  statusText = CreateText("",10, 15)
 
+  window:addElement(barBG)
+  window:addElement(loginBG)
+  window:addElement(userLbl)
+  window:addElement(passLbl)
+  --window:addElement(logginginLbl)
+  window:addElement(statusText)
   window:addElement(unEditBox)
   window:addElement(pwEditBox)
   window:addElement(loginButton)
-  window:addElement(statusText)
-  window:addElement(cancelButton)
   window:addElement(registerButton)
+  window:addElement(cancelButton)
   window:hide()
   overlay:hide()
+  
+  --logginginLbl:setVisible(false)
+  
+  loginBG:setColor(56,56,56,255)
+  barBG:setColor(100,100,100,255)
+  userLbl:setColor(255,255,255,255)
+  passLbl:setColor(255,255,255,255)
+  --logginginLbl:setColor(255,255,255,255)
+  
+  unEditBox:setTabOrder(0)
+  pwEditBox:setTabOrder(1)
+  loginButton:setTabOrder(2)
+  registerButton:setTabOrder(3)
 
   --user:login("admin","pass")
   --statusText:setText( user:getUserName() )
@@ -146,6 +174,7 @@ function onButtonPressed(button)
     else
       user:login( unEditBox:getText(), pwEditBox:getText() )
       -- statusText:setText(user:getUserName() )
+  --logginginLbl:setVisible(true)
     end
   elseif button == cancelButton then
     unEditBox:setText("")
