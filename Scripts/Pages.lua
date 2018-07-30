@@ -1,5 +1,5 @@
 local Page = {}
-local MISC, MAINT, HAZARD, AESTH = 0, 1, 2, 3
+local MISC, MAINT, HAZARD, AESTH, ALL = 0, 1, 2, 3, 4
 function Page.new()
   local o = {}
   o.currPage=""
@@ -55,6 +55,8 @@ function Page:setViewPage()
   self.elements.proFilter:addItem("Filter By: Maintanence")
   self.elements.proFilter:addItem("Filter By: Hazard")
   self.elements.proFilter:addItem("Filter By: Aesthetic")
+  self.elements.proFilter:addItem("Filter By: All")
+  self.elements.proFilter:setSelected(ALL)
 
   self.elements.menu:setColor(56,56,56,255)
   self.elements.probBG:setColor(249,249,249,255)
@@ -62,6 +64,7 @@ function Page:setViewPage()
   self:refreshViewPage()
 
   updateAccess()
+  self.elements.proFilter:bringToFront()
   self.elements.createButton:bringToFront()
   self.elements.refreshButton:bringToFront()
   self.elements.myIssuesButton:bringToFront()
@@ -131,7 +134,14 @@ end
 
 function Page:refreshViewPage()
   self.elements.listBox:clear()
-  script:triggerFunction("GetAllProblems", "Scripts/Database.lua")
+  
+  local selected = self.elements.proFilter:getSelected()
+  if selected == ALL then
+    script:triggerFunction("GetAllProblems", "Scripts/Database.lua")
+  else
+    script:triggerFunction("GetProblemsByCategory", "Scripts/Database.lua", selected)
+  end
+
 end
 
 --~~~~~~~~~~~~~~~~~Login functionality~~~~~~~~~~~~~~
@@ -255,6 +265,7 @@ end
         window:bringToFront()
   end
 end
+
 function onLeftDoubleMouseDown(mouseId)
   if mouse:getElement(mouseId) == pages[1].elements.listBox and pages[1].elements.listBox:getSelected() >= 0 then
     onButtonPressed(pages[1].elements.openButton)
@@ -264,6 +275,7 @@ end
 function onLeftMouseDown(mouseID)
   lastPressed = mouse:getElement(mouseID)
   togglePress(lastPressed, true)
+  pages[1]:refreshViewPage()
   --[[
   if mouse:getElement(mouseID) == pages[1].elements.listBox and pages[1].elements.listBox:getSelected() >= 0 then
     onButtonPressed(pages[1].elements.openButton)
@@ -277,8 +289,9 @@ end
 --~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 function onSQLReceived(results, id)
-  if id == "allProblems" then
+  if id == "allProblems" or id == "CategoricalProb" then
     if operations:arraySize(results) == 0 then
+      pages[1].elements.listBox:clear()
       pages[1].elements.listBox:addItem("No Problems Found")
     else
       pages[1].elements.listBox:clear()
