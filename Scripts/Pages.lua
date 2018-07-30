@@ -275,7 +275,6 @@ end
 function onLeftMouseDown(mouseID)
   lastPressed = mouse:getElement(mouseID)
   togglePress(lastPressed, true)
-  pages[1]:refreshViewPage()
   --[[
   if mouse:getElement(mouseID) == pages[1].elements.listBox and pages[1].elements.listBox:getSelected() >= 0 then
     onButtonPressed(pages[1].elements.openButton)
@@ -286,6 +285,13 @@ end
 function onLeftMouseUp(mouseID)
   togglePress(lastPressed, false)
 end
+------------------Element Events----------------------------
+function onElementFocusGained(elem)
+  if elem == pages[1].elements.proFilter then
+    pages[1]:refreshViewPage()
+  end
+end
+
 --~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 function onSQLReceived(results, id)
