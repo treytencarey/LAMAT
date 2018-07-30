@@ -35,20 +35,21 @@ function Page:setViewPage()
   self:destroy()
 
   self.elements = {
-    menu = CreateImage("GLOBAL/pixel.png", 0, 0, 250, 700),
+    menu = CreateImage("GLOBAL/pixel.png", 0, 0, 270, 700),
 
-    loginButton = makeButton("login", 140, 25, 100, 50),
-    logoutButton = makeButton("logout", 140, 25, 100, 50),
-    probBG = CreateImage("GLOBAL/pixel.png", 10, 75, 230, 225),
-    --probLabel = CreateText("Problems:", 10, 75, 230, 25),
-    proFilter = CreateDropList(10, 75, 230, 25),
-    listBox = CreateListBox(10, 100, 230, 200),
+    loginButton = makeButton("login", 155, 25, 100, 50),
+    logoutButton = makeButton("logout", 155, 25, 100, 50),
+credits = CreateImage("UI/credits_style3.png", 10, 25, 100, 50),
 
-    createButton = makeButton("new_problem", 10, 350, 100, 50),
-    refreshButton = makeButton("refresh", 100, 350, 50, 50),
-    myIssuesButton = makeButton("my_probs", 140, 350, 100, 50),
-    openButton = CreateButton("View Selected Problem", 10, 310, 230, 30),
-    credits = CreateImage("UI/credits_style3.png", 25, 390, 200, 100)
+    proFilter = CreateDropList(10, 75, 250, 25),
+
+createButton = makeButton("new_problem", 25, 100, 100, 50),
+    myIssuesButton = makeButton("my_probs", 145, 100, 100, 50),
+
+    probBG = CreateImage("GLOBAL/pixel.png", 10, 320, 250, 130),
+    listBox = CreateListBox(10, 320, 250, 130),
+    openButton = CreateButton("View Selected Problem", 10, 460, 200, 30),
+refreshButton = makeButton("refresh", 210, 450, 50, 50)
   }
   --self.elements.dropList:addItem("Sort By: Nearest")
   self.elements.proFilter:addItem("Filter By: Misc")
@@ -59,7 +60,7 @@ function Page:setViewPage()
   self.elements.proFilter:setSelected(ALL)
 
   self.elements.menu:setColor(56,56,56,255)
-  self.elements.probBG:setColor(249,249,249,255)
+  self.elements.probBG:setColor(100,100,100,255)
   self:formatElements()
   self:refreshViewPage()
 
@@ -80,6 +81,7 @@ function Page:setAddProblemPage(y)
     description = CreateEditBox(5,80,290,70),
     latitude = CreateEditBox(5,155,290,30),
     longitude = CreateEditBox(5,190,290,30),
+    category = CreateDropList(5, 15, 100, 20),
     createButton = CreateButton("Create Problem",5,240,290,55),
     cancelButton = makeButton("x", 250,0,50,50)
   }
@@ -91,6 +93,12 @@ function Page:setAddProblemPage(y)
   self.elements.description:setText("Description"); self.elements.description:setMultiLine(true)
   self.elements.latitude:setText("Latitude")
   self.elements.longitude:setText("Longitude")
+
+  self.elements.category:addItem("Maintanence")
+  self.elements.category:addItem("Hazard")
+  self.elements.category:addItem("Aesthetic")
+  self.elements.category:addItem("Misc")
+  self.elements.category:setSelected(3)
 
   self:formatElements()
   self.elements.cancelButton:bringToFront()
@@ -224,7 +232,19 @@ end
         table.insert(pages, newPage)
         newPage:setAddProblemPage()
       else
-        script:triggerFunction("InsertProblem", "Scripts/Database.lua", page.elements.title:getText(), 0, page.elements.description:getText(), page.elements.longitude:getText(), page.elements.latitude:getText())
+        local selected = page.elements.category:getSelected()
+        local category = 0
+        if selected == 0 then
+          category = MAINT
+        elseif selected == 1 then
+          category = HAZARD
+        elseif selected == 2 then
+          category = AESTH
+        elseif selected == 3 then
+          category = MISC
+        end
+
+        script:triggerFunction("InsertProblem", "Scripts/Database.lua", page.elements.title:getText(), category, page.elements.description:getText(), page.elements.longitude:getText(), page.elements.latitude:getText())
         if pages[1].elements.listBox:getItemCount() == 1 and pages[1].elements.listBox:getItem(0) == "No Problems Found" then pages[1].elements.listBox:clear(); end
         pages[1].elements.listBox:addItem(page.elements.title:getText())
         page:destroy()
