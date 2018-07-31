@@ -24,6 +24,8 @@ function NewRatioBar(x, y, w, h)
   function self:setParent(parent)
     parent:addElement(self.negBar)
     parent:addElement(self.posBar)
+self.negBar:bringToFront()
+self.posBar:bringToFront()
   end
 
   function self:removeParent(parent)
@@ -70,17 +72,24 @@ function NewButton(restImg, x, y, w, h)
 end
 
 function onCreated()
-  ratioBar = NewRatioBar(55, 255, 190, 25)
-  upBtn = NewButton("thumbs_up", ratioBar.x,ratioBar.y+50,100,100)
-  downBtn = NewButton("thumbs_down", ratioBar.x+100,upBtn.btn:getY(),100,100)
-  scoreBox = CreateImage( "GLOBAL/pixel.png", ratioBar.x, ratioBar.y+ratioBar.h, 190, 25)
-  scoreText = CreateText("", 0,0,scoreBox:getWidth(),scoreBox:getHeight()); scoreText:setTextAlignment("left","center")
-  scoreBox:addElement(scoreText)
+  ratioBar = NewRatioBar(85, 225, 100, 15)
+  upBtn = NewButton("thumbs_up", 10,ratioBar.y - 45,75,75)
+  downBtn = NewButton("thumbs_down", 190, upBtn.btn:getY(), upBtn.btn:getWidth(), upBtn.btn:getHeight())
+  --scoreBox = CreateImage( "GLOBAL/pixel.png", ratioBar.x, ratioBar.y+ratioBar.h, 190, 25)
+  scoreText = CreateText("0/0", ratioBar.x, ratioBar.y - 20, ratioBar.w, 20)
+  scoreText:setTextAlignment("center")
+  scoreText:setColor(255,255,255,255)
+  --scoreText = CreateText("", 0,0,scoreBox:getWidth(),scoreBox:getHeight()); scoreText:setTextAlignment("left","center")
+  --scoreBox:addElement(scoreText)
   loggedin = false
+  
+  statusText = CreateText("", 0, scoreText:getY() - 20, 270, scoreText:getHeight())
+  statusText:setTextAlignment("center")
+  statusText:setColor(255,255,255,255)
   
   --probEdit = CreateEditBox(450, 25, 100, 25)
   --displayBtn = CreateButton("Load problem",450, 50, 190, 25)
-  testBox = CreateListBox(ratioBar.x, ratioBar.y-25, 190, 50)
+  --testBox = CreateListBox(ratioBar.x, ratioBar.y-25, 190, 50)
   --voteBar = script:triggerFunction("NewRatioBar", "Scripts/RatioBar.lua", "voteBar", 450, 300, 200, 25)
   
 
@@ -93,7 +102,7 @@ function onCreated()
   allVotes = "0"
 
   --probEdit:setText("ProblemID")
-  scoreText:setText("Score output: ")
+  --scoreText:setText("Score output: ")
   
   toggleVis(false)
   
@@ -104,8 +113,8 @@ function snapToWindow()
   downBtn.btn:bringToFront()
   ratioBar.negBar:bringToFront()
   ratioBar.posBar:bringToFront()
-  scoreBox:bringToFront()
-  testBox:bringToFront()
+  scoreText:bringToFront()
+  statusText:bringToFront()
   
   --[[
   upBtn.btn:center()
@@ -127,8 +136,8 @@ function toggleVis(show)
     downBtn:ToggleVis(false)
   end
   ratioBar:ToggleVis(show)
-  scoreBox:setVisible(show)
-  testBox:setVisible(show)
+  scoreText:setVisible(show)
+  statusText:setVisible(show)
   
   if show then
     if loggedin then
@@ -136,14 +145,14 @@ function toggleVis(show)
   downBtn:Reset()
 end
 ratioBar:UpdateRatio(1)
-scoreBox:setText("Loading...")
+--scoreBox:setText("Loading...")
   end
   
 end
 
 function updateScoreBox()
   rat = 0
-  scoreText:setText("Score output: " .. upVotes .. "/" .. allVotes)
+  scoreText:setText(upVotes .. "/" .. allVotes)
   if allVotes ~= "0" then
     rat = tonumber(upVotes)/tonumber(allVotes)
   end
@@ -151,15 +160,17 @@ function updateScoreBox()
 end
 
 function updateProbAndAcc(pID)
+  statusText:setText("Updating...")
   acc = script:triggerFunction("getUserName", "Scripts/login.lua")
   if script:triggerFunction("getStatus", "Scripts/login.lua") and acc ~= nil then
     loggedin = true
-    testBox:addItem("Logged in as " .. acc)
+    --testBox:addItem("Logged in as " .. acc)
   else
     loggedin = false
     acc = ""
-    testBox:addItem("Not logged in!")
-    testBox:addItem("Please login to vote")
+    --testBox:addItem("Not logged in!")
+    --testBox:addItem("Login to vote")
+--statusText:setText("Please login to vote")
   end
     
     --probID = probEdit:getText()
@@ -171,20 +182,25 @@ function setParent(parent)
   ratioBar:setParent(parent)
   parent:addElement(upBtn.btn)
   parent:addElement(downBtn.btn)
-  parent:addElement(scoreBox)
-  parent:addElement(testBox)
+  parent:addElement(scoreText)
+  parent:addElement(statusText)
+  
+  upBtn.btn:bringToFront()
+  downBtn.btn:bringToFront()
+  scoreText:bringToFront()
+  statusText:bringToFront()
 end
 
 function removeParent(parent)
   ratioBar:removeParent(parent)
   parent:removeElement(upBtn.btn)
   parent:removeElement(downBtn.btn)
-  parent:removeElement(scoreBox)
-  parent:removeElement(testBox)
+  parent:removeElement(scoreText)
+  parent:removeElement(statusText)
 end
 
 function getVotesAndDisplay(pID)
-  testBox:clear()
+  --testBox:clear()
   updateProbAndAcc(pID)
   server:getSQL("database/database.db", "select Account, Title from Problem where ID = " .. probID, "displayproblem")
   --server:getSQL("database/database.db", "select Upvote from Vote where ProblemID = " .. probID, "displayvotes")
@@ -249,6 +265,11 @@ function onSQLReceived(results, id)
     upVotes = returnSingle(results)
 
   elseif id == "updatetotalvotesandratio" then
+    if loggedin then
+      statusText:setText("")
+else
+  statusText:setText("Login to vote")
+end
     allVotes = returnSingle(results)
     newRatio = updateScoreBox()
     ratioBar:UpdateRatio(newRatio)
@@ -280,15 +301,15 @@ function onSQLReceived(results, id)
         vote = "-1"
       end
     end
-    testBox:addItem("vote: " .. vote)
+    --testBox:addItem("vote: " .. vote)
     exists = returnSingle(results)
     if exists == '0' then
       server:getSQL("database/database.db", "insert into Vote(Account, Upvote, ProblemID) values ('" .. acc .. "', " .. vote .. ", '" .. probID .. "')", "insertvote")
     else
       server:getSQL("database/database.db", "update Vote set Upvote=" .. vote .. " where Account = '" .. acc .. "' and ProblemID=" .. probID, "updatevote")
     end
-    testBox:addItem("id: " .. id)
-    testBox:addItem("vote: " .. vote)
+    --testBox:addItem("id: " .. id)
+    --testBox:addItem("vote: " .. vote)
 
   elseif id == "updatevote" then
     --testBox:addItem("UPDATED!")

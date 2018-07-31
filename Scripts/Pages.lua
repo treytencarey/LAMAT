@@ -109,27 +109,52 @@ function Page:setViewProblemPage(y)
   self:destroy()
 
   self.elements = {
-    menu = CreateWindow("View Problem",0,100,300,410),
+    menu = CreateWindow("View Problem",0,100,270,325),
     overlay = CreateImage("GLOBAL/pixel.png",0,0,0,0),
-    title = CreateEditBox(5,50,290,30),
-    description = CreateEditBox(5,85,290,70),
-    latitude = CreateEditBox(5,160,290,30),
-    longitude = CreateEditBox(5,195,290,30),
-    cancelButton = makeButton("x", 250,0,50,50),
-    updateButton = CreateButton("Edit", 110,15,50,30)
+bg = CreateImage("GLOBAL/pixel.png",0,0,270,375),
+barBG = CreateImage("GLOBAL/pixel.png", 0, 275, 270, 50),
+descBG = CreateImage("GLOBAL/pixel.png", 0, 50, 270, 100),
+--titleLbl = CreateText("Title:",5,20,50,30),
+    title = CreateText("Title",0,20,270,30),
+    description = CreateText("Description", 10,60,250,100),
+latlong = CreateText("", 10,150,250,30),
+    --latitude = CreateEditBox(10,190,122.5,30),
+    --longitude = CreateEditBox(137.5,190,122.5,30),
+    cancelButton = makeButton("x", 220,270,50,50),
+    updateButton = CreateButton("Edit problem", 10, 270,100,50)
   }
 
+  self.elements.bg:setColor(60,60,60,255)
+  self.elements.barBG:setColor(50,50,50,255)
+  self.elements.descBG:setColor(230,230,230,255)
+  --self.elements.titleLbl:setColor(255,255,255,255)
+  
   self.elements.menu:setMovable();
   self.elements.menu:setMovableBoundaries(0-280, 0, 640+280, 480+225)
-  self.elements.title:setText("Title")
-  self.elements.description:setText("Description"); self.elements.description:setMultiLine(true)
-  self.elements.latitude:setText("Latitude")
-  self.elements.longitude:setText("Longitude")
-  script:triggerFunction("setParent", "Scripts/vote.lua", self.elements.menu)
+  self.elements.title:setTextAlignment("center")
+  self.elements.title:setColor(255,255,255,255)
+  --self.elements.title:setText("Title")
+  --self.elements.description:setText("Description")
+  self.elements.description:setMultiLine(true)
+  self.elements.description:setWordWrap(true)
+  self.elements.description:setTextAlignment("left", "upper")
+  self.elements.latlong:setColor(255,255,255,255)
+  --self.elements.latitude:setText("Latitude")
+  --self.elements.longitude:setText("Longitude")
 
   self:formatElements()
+  
+  self.elements.barBG:bringToFront()
+  self.elements.descBG:bringToFront()
+  --self.elements.titleLbl:bringToFront()
+  self.elements.title:bringToFront()
+  self.elements.description:bringToFront()
+  self.elements.latlong:bringToFront()
+  --self.elements.latitude:bringToFront()
+  --self.elements.longitude:bringToFront()
   self.elements.cancelButton:bringToFront()
 self.elements.updateButton:bringToFront()
+  script:triggerFunction("setParent", "Scripts/vote.lua", self.elements.menu)
 
 end
 
@@ -334,8 +359,9 @@ function onSQLReceived(results, id)
     
     pages[modalNo].elements.title:setText(results["Title"][1])
     pages[modalNo].elements.description:setText(results["Description"][1])
-    pages[modalNo].elements.longitude:setText(results["Longitude"][1])
-    pages[modalNo].elements.latitude:setText(results["Latitude"][1])
+    --pages[modalNo].elements.longitude:setText(results["Longitude"][1])
+    --pages[modalNo].elements.latitude:setText(results["Latitude"][1])
+pages[modalNo].elements.latlong:setText("Located at " .. results["Latitude"][1] .. ", " .. results["Longitude"][1])
   end
 end
 
