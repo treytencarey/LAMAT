@@ -116,7 +116,7 @@ function Page:setViewProblemPage(y)
     latitude = CreateEditBox(5,160,290,30),
     longitude = CreateEditBox(5,195,290,30),
     cancelButton = makeButton("x", 250,0,50,50),
-    updateButton = CreateButton("Edit Description", 110,15,50,30)
+    updateButton = CreateButton("Edit", 110,15,50,30)
   }
 
   self.elements.menu:setMovable();
