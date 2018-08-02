@@ -116,12 +116,12 @@ barBG = CreateImage("GLOBAL/pixel.png", 0, 275, 270, 50),
 descBG = CreateImage("GLOBAL/pixel.png", 0, 50, 270, 100),
 --titleLbl = CreateText("Title:",5,20,50,30),
     title = CreateText("Title",0,20,270,30),
-    description = CreateText("Description", 10,60,250,100),
+    description = CreateEditBox(10,60,250,90),
 latlong = CreateText("", 10,150,250,30),
     --latitude = CreateEditBox(10,190,122.5,30),
     --longitude = CreateEditBox(137.5,190,122.5,30),
     cancelButton = makeButton("x", 220,270,50,50),
-    updateButton = CreateButton("Edit problem", 10, 270,100,50)
+    updateButton = CreateButton("Edit Description", 10, 270,120,50)
   }
 
   self.elements.bg:setColor(60,60,60,255)
