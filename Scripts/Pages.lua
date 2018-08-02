@@ -159,6 +159,9 @@ self.elements.updateButton:bringToFront()
 end
 
 function Page:destroy()
+  script:triggerFunction("removeParent", "Scripts/vote.lua", self.elements.menu)
+  script:triggerFunction("toggleVis", "Scripts/vote.lua", false)
+
   for i,element in pairs(self.elements) do
     element:remove()
   end
@@ -277,14 +280,17 @@ end
     end
 
     if button == page.elements.cancelButton then
-      script:triggerFunction("removeParent", "Scripts/vote.lua", getTopModal().elements.menu)
-      script:triggerFunction("toggleVis", "Scripts/vote.lua", false)
       page:destroy()
     end 
 
     if button == page.elements.refreshButton then
       pages[1].elements.listBox:clear()
       pages[1]:refreshViewPage()
+    end
+
+    if button == page.elements.updateButton then
+        script:triggerFunction("UpdateProblem", "Scripts/Database.lua", page.elements.title:getText(), page.elements.description:getText())
+        page:destroy()
     end
   end
   if button == pages[1].elements.openButton and pages[1].elements.listBox:getSelected() >= 0 then
@@ -303,11 +309,6 @@ end
     overlay:show()
     overlay:bringToFront()
     window:bringToFront()
-  end
-  if button == getTopModal().elements.updateButton then
-        script:triggerFunction("UpdateProblem", "Scripts/Database.lua", getTopModal().elements.title:getText(), getTopModal().elements.description:getText())
-        getTopModal():destroy()
-        window:bringToFront()
   end
 end
 
