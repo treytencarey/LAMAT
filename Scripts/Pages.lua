@@ -39,19 +39,18 @@ function Page:setViewPage()
 
     loginButton = makeButton("login", 155, 25, 100, 50),
     logoutButton = makeButton("logout", 155, 25, 100, 50),
-credits = CreateImage("UI/credits_style3.png", 10, 25, 100, 50),
+    credits = CreateImage("UI/credits_style3.png", 10, 25, 100, 50),
 
     proFilter = CreateDropList(10, 75, 250, 25),
 
-createButton = makeButton("new_problem", 25, 100, 100, 50),
+    createButton = makeButton("new_problem", 25, 100, 100, 50),
     myIssuesButton = makeButton("my_probs", 145, 100, 100, 50),
 
     probBG = CreateImage("GLOBAL/pixel.png", 10, 320, 250, 130),
     listBox = CreateListBox(10, 320, 250, 130),
     openButton = CreateButton("View Selected Problem", 10, 460, 200, 30),
-refreshButton = makeButton("refresh", 210, 450, 50, 50)
+    refreshButton = makeButton("refresh", 210, 450, 50, 50)
   }
-  --self.elements.dropList:addItem("Sort By: Nearest")
   self.elements.proFilter:addItem("Filter By: Misc")
   self.elements.proFilter:addItem("Filter By: Maintanence")
   self.elements.proFilter:addItem("Filter By: Hazard")
@@ -104,58 +103,86 @@ function Page:setAddProblemPage(y)
   self.elements.cancelButton:bringToFront()
 end
 
+function Page:setViewProblemDescription(descr)
+  self.elements.description:setText(descr);
+  
+  if self.elements.descriptionScrollBar == nil then return; end
+  
+  if self.elements.descriptionScrollBar:isVisible() == false and self.elements.description:getTextHeight() > self.elements.descBG:getHeight() then
+    self.elements.description:setWidth(self.elements.description:getWidth() - self.elements.descriptionScrollBar:getWidth())
+    self.elements.description:setTextAlignment("left", "upper")
+    self.elements.descriptionScrollBar:setMax(self.elements.description:getTextHeight() - self.elements.descriptionScrollBar:getHeight())
+    self.elements.descriptionScrollBar:show()
+    self.elements.description:setHeight(self.elements.description:getTextHeight())
+  elseif self.elements.descriptionScrollBar:isVisible() and self.elements.description:getTextHeight() <= self.elements.descBG:getHeight() then
+    self.elements.description:setWidth(self.elements.description:getWidth() + self.elements.descriptionScrollBar:getWidth())
+    self.elements.description:setTextAlignment("left", "center")
+    self.elements.descriptionScrollBar:hide()
+  else
+    self.elements.description:setTextAlignment("left", "center")
+  end
+end
+
+function Page:setViewProblemEditable(editable)
+  if editable == nil then editable = true; end
+
+  if self.elements.description ~= nil then
+    self.elements.description:remove()
+  end
+  if self.elements.descriptionScrollBar ~= nil then
+    self.elements.descriptionScrollBar:remove()
+    self.elements.descriptionScrollBar = nil
+  end
+
+  if editable then
+    self.elements.description = CreateEditBox(0,50,270,100);
+    self.elements.description:setMultiLine(true)
+    self.elements.description:setWordWrap(true)
+    self.elements.menu:addElement(self.elements.description)
+  else
+    self.elements.description = CreateText("",0,0,270,100);
+    self.elements.descriptionScrollBar = CreateScrollBar(false,0,0,15,100); self.elements.descriptionScrollBar:setX(self.elements.description:getWidth() - self.elements.descriptionScrollBar:getWidth()); self.elements.descriptionScrollBar:hide()
+    self.elements.descBG:addElement(self.elements.descriptionScrollBar)
+    self.elements.descBG:addElement(self.elements.description)
+  end
+end
 
 function Page:setViewProblemPage(y)
   self:destroy()
 
   self.elements = {
-    menu = CreateWindow("View Problem",0,100,270,325),
+    menu = CreateImage("GLOBAL/pixel.png",0,0,270,325),
     overlay = CreateImage("GLOBAL/pixel.png",0,0,0,0),
-bg = CreateImage("GLOBAL/pixel.png",0,0,270,375),
-barBG = CreateImage("GLOBAL/pixel.png", 0, 275, 270, 50),
-descBG = CreateImage("GLOBAL/pixel.png", 0, 50, 270, 100),
---titleLbl = CreateText("Title:",5,20,50,30),
+    barBG = CreateImage("GLOBAL/pixel.png", 0, 275, 270, 50),
+    descBG = CreateImage("GLOBAL/pixel.png", 0, 50, 270, 100),
     title = CreateText("Title",0,20,270,30),
-    description = CreateEditBox(10,60,250,90),
-latlong = CreateText("", 10,150,250,30),
-    --latitude = CreateEditBox(10,190,122.5,30),
-    --longitude = CreateEditBox(137.5,190,122.5,30),
+    -- description has moved to setViewProblemEditable()
+    latlong = CreateText("", 10,150,250,30),
     cancelButton = makeButton("x", 220,270,50,50),
     updateButton = CreateButton("Edit Description", 10, 270,120,50)
   }
 
-  self.elements.bg:setColor(60,60,60,255)
+  self:formatElements()
+  self:setViewProblemEditable(false)
+
+  self.elements.menu:setColor(60,60,60,255)
   self.elements.barBG:setColor(50,50,50,255)
   self.elements.descBG:setColor(230,230,230,255)
-  --self.elements.titleLbl:setColor(255,255,255,255)
   
   self.elements.menu:setMovable();
-  self.elements.menu:setMovableBoundaries(0-280, 0, 640+280, 480+225)
+  self.elements.menu:setMovableBoundaries(0-self.elements.menu:getWidth()+40, 0, 640+self.elements.menu:getWidth()-40, 480+self.elements.menu:getHeight()-40)
   self.elements.title:setTextAlignment("center")
   self.elements.title:setColor(255,255,255,255)
-  --self.elements.title:setText("Title")
-  --self.elements.description:setText("Description")
-  self.elements.description:setMultiLine(true)
-  self.elements.description:setWordWrap(true)
-  self.elements.description:setTextAlignment("left", "upper")
   self.elements.latlong:setColor(255,255,255,255)
-  --self.elements.latitude:setText("Latitude")
-  --self.elements.longitude:setText("Longitude")
 
-  self:formatElements()
-  
   self.elements.barBG:bringToFront()
   self.elements.descBG:bringToFront()
-  --self.elements.titleLbl:bringToFront()
   self.elements.title:bringToFront()
   self.elements.description:bringToFront()
   self.elements.latlong:bringToFront()
-  --self.elements.latitude:bringToFront()
-  --self.elements.longitude:bringToFront()
   self.elements.cancelButton:bringToFront()
-self.elements.updateButton:bringToFront()
+  self.elements.updateButton:bringToFront()
   script:triggerFunction("setParent", "Scripts/vote.lua", self.elements.menu)
-
 end
 
 function Page:destroy()
@@ -190,13 +217,13 @@ function updateAccess()
   end
   pages[1].elements.createButton:setVisible(loggedin)
   pages[1].elements.myIssuesButton:setVisible(loggedin)
- if status == true then
- pages[1].elements.loginButton:setVisible(false)
- pages[1].elements.logoutButton:setVisible(true)
-else
- pages[1].elements.loginButton:setVisible(true)
- pages[1].elements.logoutButton:setVisible(false)
-end
+  if status == true then
+    pages[1].elements.loginButton:setVisible(false)
+    pages[1].elements.logoutButton:setVisible(true)
+  else
+    pages[1].elements.loginButton:setVisible(true)
+    pages[1].elements.logoutButton:setVisible(false)
+  end
 end
 
 --~~~~~~~~~~~~~~~~~Button functions~~~~~~~~~~~~~~~~~
@@ -208,7 +235,6 @@ function makeButton(imgName, x, y, w, h)
 end
 
 function togglePress(btn, press)
-
   if btn:getElementType() ~= "CreateButton" then
     return true
   end
@@ -217,7 +243,7 @@ function togglePress(btn, press)
   newImg = nil
   if img == "" then
     --default button
-return true
+    return true
   elseif press then
     newImg = string.sub(img, 1, -5) .. "_pressed.png"
   else
@@ -249,11 +275,11 @@ function onButtonPressed(button)
     end
   end
  
-if button == pages[1].elements.logoutButton then
-  script:triggerFunction("setStatus", "Scripts/login.lua", false)
-end
+  if button == pages[1].elements.logoutButton then
+    script:triggerFunction("setStatus", "Scripts/login.lua", false)
+  end
 
-     for i,page in pairs(pages) do
+  for i,page in pairs(pages) do
     if button == page.elements.createButton then
       if i == 1 then
         newPage = Page.new()
@@ -302,7 +328,7 @@ end
     script:triggerFunction("snapToWindow", "Scripts/vote.lua")
   end
   
-   if button == pages[1].elements.loginButton then
+  if button == pages[1].elements.loginButton then
     window = script:getValue("window", "Scripts/login.lua")
     window:show()
     overlay = script:getValue("overlay", "Scripts/login.lua")
@@ -321,20 +347,25 @@ end
 function onLeftMouseDown(mouseID)
   lastPressed = mouse:getElement(mouseID)
   togglePress(lastPressed, true)
-  --[[
-  if mouse:getElement(mouseID) == pages[1].elements.listBox and pages[1].elements.listBox:getSelected() >= 0 then
-    onButtonPressed(pages[1].elements.openButton)
-  end
-  --]]
 end
 
 function onLeftMouseUp(mouseID)
   togglePress(lastPressed, false)
 end
+
 ------------------Element Events----------------------------
+
 function onElementFocusGained(elem)
   if elem == pages[1].elements.proFilter then
     pages[1]:refreshViewPage()
+  end
+end
+
+function onScrollBarChanged(scrollBar, lastVal)
+  for i,page in pairs(pages) do
+    if scrollBar == page.elements.descriptionScrollBar then
+      page.elements.description:setY(page.elements.description:getY() - (scrollBar:getValue() - lastVal))
+    end
   end
 end
 
@@ -359,10 +390,18 @@ function onSQLReceived(results, id)
     script:triggerFunction("toggleVis", "Scripts/vote.lua", true)
     
     pages[modalNo].elements.title:setText(results["Title"][1])
-    pages[modalNo].elements.description:setText(results["Description"][1])
-    --pages[modalNo].elements.longitude:setText(results["Longitude"][1])
-    --pages[modalNo].elements.latitude:setText(results["Latitude"][1])
-pages[modalNo].elements.latlong:setText("Located at " .. results["Latitude"][1] .. ", " .. results["Longitude"][1])
+    pages[modalNo].elements.latlong:setText("Located at " .. results["Latitude"][1] .. ", " .. results["Longitude"][1])
+
+    local acctStatus = script:triggerFunction("getStatus", "Scripts/login.lua")
+    if acctStatus == true then
+      local account = script:triggerFunction("getUserName", "Scripts/login.lua")
+      if account ~= nil then
+        if account == results["Account"][1] then
+          pages[modalNo]:setViewProblemEditable()
+        end
+      end
+    end
+    pages[modalNo]:setViewProblemDescription(results["Description"][1])
   end
 end
 
