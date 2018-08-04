@@ -46,8 +46,8 @@ function Page:setViewPage()
     createButton = makeButton("new_problem", 25, 100, 100, 50),
     myIssuesButton = makeButton("my_probs", 145, 100, 100, 50),
 
-    probBG = CreateImage("GLOBAL/pixel.png", 10, 320, 250, 130),
-    listBox = CreateListBox(10, 320, 250, 130),
+    probBG = CreateImage("GLOBAL/pixel.png", 10, 380, 250, 70),
+    listBox = CreateListBox(10, 380, 250, 70),
     openButton = CreateButton("View Selected Problem", 10, 460, 200, 30),
     refreshButton = makeButton("refresh", 210, 450, 50, 50)
   }
@@ -57,6 +57,7 @@ function Page:setViewPage()
   self.elements.proFilter:addItem("Filter By: Aesthetic")
   self.elements.proFilter:addItem("Filter By: All")
   self.elements.proFilter:setSelected(ALL)
+ 
 
   self.elements.menu:setColor(56,56,56,255)
   self.elements.probBG:setColor(100,100,100,255)
@@ -68,6 +69,9 @@ function Page:setViewPage()
   self.elements.createButton:bringToFront()
   self.elements.refreshButton:bringToFront()
   self.elements.myIssuesButton:bringToFront()
+  
+  --script:triggerFunction("setParent", "Scripts/map.lua", self.elements.menu)
+    self.elements.listBox:bringToFront()
 end
 
 function Page:setAddProblemPage(y)
