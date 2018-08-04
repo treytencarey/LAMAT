@@ -268,6 +268,7 @@ function onCreated()
   --ref to last button pressed so its img can be changed when pressed/released
   lastPressed = nil
   updateAccess()
+  --displayProblem(1)
 end
 
 --~~~~~~~~~~~~~~~~~Mouse functions~~~~~~~~~~~~~~~~~
@@ -324,12 +325,15 @@ function onButtonPressed(button)
     end
   end
   if button == pages[1].elements.openButton and pages[1].elements.listBox:getSelected() >= 0 then
-    script:triggerFunction("ViewProblem", "Scripts/Database.lua", pages[1].elements.listBox:getSelectedName(), operations:arraySize(pages)+1)
+    
+script:triggerFunction("ViewProblem", "Scripts/Database.lua", pages[1].elements.listBox:getSelectedName(), operations:arraySize(pages)+1)
     newPage = Page.new()
     newPage:setViewProblemPage()
     table.insert(pages, newPage)
     script:triggerFunction("toggleVis", "Scripts/vote.lua", true)
     script:triggerFunction("snapToWindow", "Scripts/vote.lua")
+
+--displayProblem(pages[1].elements.listBox:getSelectedName())
   end
   
   if button == pages[1].elements.loginButton then
@@ -340,6 +344,19 @@ function onButtonPressed(button)
     overlay:bringToFront()
     window:bringToFront()
   end
+end
+
+function displayProblem(pid)
+  server:getSQL("database/database.db", "select Title from Problem where ID = " .. pid, "gettitlefromid")
+end
+
+function displayProblemFromTitle(title)
+  script:triggerFunction("ViewProblem", "Scripts/Database.lua", title, operations:arraySize(pages)+1)
+  newPage = Page.new()
+  newPage:setViewProblemPage()
+  table.insert(pages, newPage)
+  script:triggerFunction("toggleVis", "Scripts/vote.lua", true)
+  script:triggerFunction("snapToWindow", "Scripts/vote.lua")
 end
 
 function onLeftDoubleMouseDown(mouseId)
@@ -376,6 +393,9 @@ end
 --~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 function onSQLReceived(results, id)
+  if id == "gettitlefromid" then
+    displayProblemFromTitle(results["Title"][1])
+  end
   if id == "allProblems" or id == "CategoricalProb" then
     if operations:arraySize(results) == 0 then
       pages[1].elements.listBox:clear()
