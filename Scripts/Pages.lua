@@ -41,15 +41,15 @@ function Page:setViewPage()
     logoutButton = makeButton("logout", 155, 25, 100, 50),
     credits = CreateImage("UI/credits_style3.png", 10, 25, 100, 50),
 
-    proFilter = CreateDropList(10, 75, 250, 25),
+    createButton = makeButton("new_problem", 25, 425, 100, 50),
+    myIssuesButton = makeButton("my_probs", 145, 425, 100, 50),
 
-    createButton = makeButton("new_problem", 25, 100, 100, 50),
-    myIssuesButton = makeButton("my_probs", 145, 100, 100, 50),
-
-    probBG = CreateImage("GLOBAL/pixel.png", 10, 380, 250, 70),
+    probBG = CreateImage("GLOBAL/pixel.png", 10, 350, 250, 140),
     listBox = CreateListBox(10, 380, 250, 70),
     openButton = CreateButton("View Selected Problem", 10, 460, 200, 30),
-    refreshButton = makeButton("refresh", 210, 450, 50, 50)
+
+    proFilter = CreateDropList(10, 350, 200, 25),
+    refreshButton = makeButton("refresh", 215, 350, 50, 50)
   }
   self.elements.proFilter:addItem("Filter By: Misc")
   self.elements.proFilter:addItem("Filter By: Maintanence")
@@ -57,7 +57,11 @@ function Page:setViewPage()
   self.elements.proFilter:addItem("Filter By: Aesthetic")
   self.elements.proFilter:addItem("Filter By: All")
   self.elements.proFilter:setSelected(ALL)
- 
+  
+--~~~~~~~HIDING LIST OF PROBLEMS AND VIEW BUTTON!!!!!!!!!!!!!!!! IT'S STILL THERE JUST HIDDEN~~~~~~~~~~~~~~~~~~~~~~~
+  self.elements.probBG:setVisible(false)
+  self.elements.listBox:setVisible(false)
+  self.elements.openButton:setVisible(false)
 
   self.elements.menu:setColor(56,56,56,255)
   self.elements.probBG:setColor(100,100,100,255)
@@ -94,14 +98,18 @@ function Page:setAddProblemPage(y)
   self.elements.menu:setMovable(); self.elements.menu:setMovableBoundaries(0-280, 0, 640+280, 480+225)
   self.elements.title:setText("Title")
   self.elements.description:setText("Description"); self.elements.description:setMultiLine(true)
-  self.elements.latitude:setText("Latitude")
-  self.elements.longitude:setText("Longitude")
+  local lat = script:triggerFunction("droppedPinLat", "Scripts/map.lua")
+  local long = script:triggerFunction("droppedPinLong", "Scripts/map.lua")
+  self.elements.latitude:setText(tostring(lat))
+  self.elements.longitude:setText(tostring(long))
 
   self.elements.category:addItem("Maintanence")
   self.elements.category:addItem("Hazard")
   self.elements.category:addItem("Aesthetic")
   self.elements.category:addItem("Misc")
   self.elements.category:setSelected(3)
+  
+  --script:triggerFunction("setParent", "Scripts/map.lua", self.elements.menu)
 
   self:formatElements()
   self.elements.cancelButton:bringToFront()
@@ -270,11 +278,13 @@ function onCreated()
   --ref to last button pressed so its img can be changed when pressed/released
   lastPressed = nil
   updateAccess()
-  --displayProblem(1)
+  
+  
 end
 
 --~~~~~~~~~~~~~~~~~Mouse functions~~~~~~~~~~~~~~~~~
 function onButtonPressed(button)
+  script:triggerFunction("Display", "Scripts/map.lua")
   if button==pages[1].elements.myIssuesButton then
     pages[1].elements.listBox:clear()
     if script:triggerFunction("getStatus", "Scripts/login.lua") then
@@ -374,6 +384,14 @@ end
 
 function onLeftMouseUp(mouseID)
   togglePress(lastPressed, false)
+end
+
+--~~~~~~~~~~~~~~~~~~~~Called by map~~~~~~~~~~~~~~~~~~~~~~~~~
+function displayMapButtons()
+  --CreateButton("it was called at least",0,0,100,100)
+  pages[1].elements.createButton:bringToFront()
+  pages[1].elements.myIssuesButton:bringToFront()
+  --CreateButton("YOOOOOO!!!",0,0,100,100)
 end
 
 ------------------Element Events----------------------------

@@ -6,7 +6,8 @@ function NewPin(id, lat, long)
   self.lat = lat
   self.long = long
   
-  self.pin = CreateImage("UI/pin.png",0,0,30,30)
+  self.pin = CreateButton("",0,0,30,30)
+  self.pin:setImage("UI/pin.png")
   
   function self:updateLocation(screeny, screenx)
     self.pin:setX(screenx - self.pin:getWidth() / 2)
@@ -24,7 +25,7 @@ function NewMap()
   --default map size
   --default max crop coords
   --lat/long boundaries
-  self.x, self.y, self.w, self.h = 185, 100, 270, 250
+  self.x, self.y, self.w, self.h = 185, 65, 270, 250
   self.maxCropX, self.maxCropY = 0, 0
   self.westLong, self.eastLong, self.southLat, self.northLat = -96.0625, -95.75, 41.1875, 41.344
   
@@ -36,10 +37,13 @@ function NewMap()
 
   --pins
   self.pins = {}
+  self.pinDropped = false
+  self.droppedPin = CreateImage("UI/tack.png", 0, 0, 30, 30)
+  self.dpLat, self.dpLong = -95.9, 41.25
   
   --zoom
   self.zoom = 1
-  self.zoomBtn = CreateButton("Zoom",100,100,50,50)
+  self.zoomBtn = CreateButton("Zoom",400,75,50,50)
   
   --map image
   self.map = CreateImage("Map/omaha_zoom1.png", self.x, self.y, self.w, self.h)
@@ -48,6 +52,7 @@ function NewMap()
   self.map:setClipped(true)
   self.map:setMovable(false)
   
+--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~Map front-end functions~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   function self:PopulateFromDB(category)
   
     for i,v in pairs(self.pins) do
@@ -62,52 +67,40 @@ else
 end
   end
   
-  function self:getPressedPin(mausu)
-    local elem = mouse:getElement(mausu)
-
-for pid, prob in pairs(self.pins) do
-  if self.pins[pid].pin == elem then
-    return self.pins[pid]
-  end
-end
-
-  end
-
-  function self:updateMaxCrop()
-    self.maxCropX = self.map:getImageWidth() - self.w
-    self.maxCropY = self.map:getImageHeight() - self.h
-  end
-  
-  function self:gpsToScreen(lat, long)
-    local cropx, cropy, trash1, trash2 = self.map:getCrop()
-    local longDif = self.westLong - self.eastLong
-local longOff = self.westLong - long
-local latDif = self.northLat - self.southLat
-local latOff = self.northLat - lat
-local screenx = self.x - cropx + self.map:getImageWidth() * (longOff / longDif)
-local screeny = self.y - cropy + self.map:getImageHeight() * (latOff / latDif)
-    return screenx, screeny
-  end
-  
   function self:AddPin(id, lat, long)
+  --Sticks a pin on the map and adds it to the pins table.
     local newPin = NewPin(id,lat,long)
+self.map:addElement(newPin)
 local screeny, screenx = self:gpsToScreen(lat, long)
 newPin:updateLocation(screenx, screeny)
     table.insert(self.pins, id, newPin)
   end
   
   function self:UpdatePinLocations()
+  --Moves all the pins to match up with the newly dragged-to location.
     cursorBox:clear()
     for pid, prob in pairs(self.pins) do
   local p = self.pins[pid]
   local screeny, screenx = self:gpsToScreen(p.lat, p.long)
   p:updateLocation(screenx, screeny)
+  p.pin:setVisible(p.pin:getX() > self.x and
+                   p.pin:getX() < (self.x + self.w) and
+   p.pin:getY() > self.y and
+   p.pin:getY() < (self.y + self.h)
+  )
   p.pin:bringToFront()
   cursorBox:addItem(pid .. ": " .. screenx .. ", " .. screeny)
     end
+--Update dropped pin
+local dpy, dpx = self:gpsToScreen(self.dpLat, self.dpLong)
+self.droppedPin:bringToFront()
+self.droppedPin:setX(dpy)
+self.droppedPin:setY(dpx)
+
   end
 
   function self:Pan(pos)
+  --Moves the map within its bounds to the mouse.
 local difx = mouse:getX(pos) - self.xi
 local dify = mouse:getY(pos) - self.yi
 local panx = self.cxi - difx
@@ -131,19 +124,78 @@ self.map:crop(panx, pany, self.w, self.h)
   end
   
   function self:Zoom(z)
+  --Swaps map images.
     self.zoom = z
     self.map:setImage("Map/omaha_zoom" .. self.zoom .. ".png")
 self.map:setScaleImage(false)
   end
   
+  function self:Display()
+  --Brings map and pins to front. Also calls function in Pages to bring the buttons on top of the map to the top.
+    self.map:bringToFront()
+self.zoomBtn:bringToFront()
+self:UpdatePinLocations()
+script:triggerFunction("displayMapButtons", "Scripts/Pages.lua")
+cursorBox:addItem("it worked")
+  end
+  
+--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~Map back-end functions~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+  function self:getSpan()
+  --Returns the span of latitude and longitude
+    local longDif = self.westLong - self.eastLong
+local latDif = self.northLat - self.southLat
+return longDif, latDif
+  end
+
+  function self:screenToGps(screenx, screeny)
+    local cropx, cropy = self.map:getCrop()
+local imgRatioX = (screenx + cropx - self.x) / self.map:getImageWidth()
+local imgRatioY = (screeny + cropy - self.y) / self.map:getImageHeight()
+local longDif, latDif = self:getSpan()
+local long = self.westLong - longDif * imgRatioX
+local lat = self.northLat - latDif * imgRatioY
+    return lat, long
+  end
+  
+  function self:gpsToScreen(lat, long)
+  --Returns the screen position for the given lat/long.
+    local cropx, cropy = self.map:getCrop()
+local longDif, latDif = self:getSpan()
+local longOff = self.westLong - long
+local latOff = self.northLat - lat
+local screenx = self.x - cropx + self.map:getImageWidth() * (longOff / longDif)
+local screeny = self.y - cropy + self.map:getImageHeight() * (latOff / latDif)
+    return screenx, screeny
+  end
+
+  function self:getPressedPin(mausu)
+  --Called when left mouse if released, returns the pin that was pressed.
+    local elem = mouse:getElement(mausu)
+
+for pid, prob in pairs(self.pins) do
+  if self.pins[pid].pin == elem then
+    return self.pins[pid]
+  end
+end
+
+  end
+
+  function self:updateMaxCrop()
+  --Updates the boundaries that the map can be panned to. Should be called when zooming / switching map images.
+    self.maxCropX = self.map:getImageWidth() - self.w
+    self.maxCropY = self.map:getImageHeight() - self.h
+  end
   
   function self:setPressXY(mID)
+  --Sets initial mouse and crop coordinates when mouse is pressed.
     self.xi = mouse:getX(mID)
 self.yi = mouse:getY(mID)
 self.cxi, self.cyi = map.map:getCrop()
   end
 
   function self:setReleaseXY(mID)
+  --Sets final mouse coordinates when mouse is released.
     self.xf = mouse:getX(mID)
 self.yf = mouse:getY(mID)
   end
@@ -166,6 +218,7 @@ function onCreated()
   mapBox = CreateListBox(75,300,75,300)
   cursorBox = CreateListBox(500,300,300,300)
   map:PopulateFromDB()
+  map:Display()
   --map:AddPin(2,41.2,-96)
   --map:AddPin(106,200,200)
   --map:AddPin(4,41.259635,-96.023949)
@@ -174,6 +227,23 @@ end
 --~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~Static functions~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 function refreshMap(category)
   map:PopulateFromDB(category)
+end
+
+function droppedPinLat()
+  return map.dpLat
+end
+
+function droppedPinLong()
+  return map.dpLong
+end
+
+function setPinDropped(dropped)
+  map.pinDropped = dropped
+  map.droppedPin:setVisible(dropped)
+end
+
+function getPinDropped()
+  return map.pinDropped
 end
 
 --~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~Mouse functions~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -193,6 +263,14 @@ local elem = map:getPressedPin(mu)
 if elem ~= nil then
   cursorBox:addItem(elem.id)
   script:triggerFunction("displayProblem", "Scripts/Pages.lua", elem.id)
+elseif mouse:getElement(mu) == map.map then
+  map.dpLat, map.dpLong = map:screenToGps(mouse:getX(mu), mouse:getY(mu))
+  --Update dropped pin
+  local dpy, dpx = map:gpsToScreen(map.dpLat, map.dpLong)
+  map.droppedPin:bringToFront()
+  map.droppedPin:setX(dpy)
+  map.droppedPin:setY(dpx)
+  cursorBox:addItem("pindrop!")
 end
   end
   mDrag = false
@@ -204,6 +282,9 @@ function onMouseMoved(mm)
     map:Pan(mm)
 map:UpdatePinLocations()
     updateBoxes(mm)
+local testLat, testLong = map:screenToGps(mouse:getX(mm), mouse:getY(mm))
+cursorBox:addItem(testLat)
+cursorBox:addItem(testLong)
   end
   
 end
@@ -219,7 +300,7 @@ end
 end
 
 
---~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~Misc functions~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~Debug functions~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 function setParent(parent)
   map:setParent(parent)
 end
