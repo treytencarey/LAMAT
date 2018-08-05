@@ -205,8 +205,10 @@ function Page:refreshViewPage()
   local selected = self.elements.proFilter:getSelected()
   if selected == ALL then
     script:triggerFunction("GetAllProblems", "Scripts/Database.lua")
+script:triggerFunction("refreshMap", "Scripts/map.lua")
   else
     script:triggerFunction("GetProblemsByCategory", "Scripts/Database.lua", selected)
+script:triggerFunction("refreshMap", "Scripts/map.lua", selected)
   end
 
 end

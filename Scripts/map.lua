@@ -48,6 +48,20 @@ function NewMap()
   self.map:setClipped(true)
   self.map:setMovable(false)
   
+  function self:PopulateFromDB(category)
+  
+    for i,v in pairs(self.pins) do
+  self.pins[i].pin:remove()
+  self.pins[i]=nil
+end
+  
+    if category == nil then
+  server:getSQL("database/database.db", "select ID, Latitude, Longitude from Problem", "getallpins")
+else
+      server:getSQL("database/database.db", "select ID, Latitude, Longitude from Problem where Category = " .. category, "getallpins")
+end
+  end
+  
   function self:getPressedPin(mausu)
     local elem = mouse:getElement(mausu)
 
@@ -151,12 +165,16 @@ function onCreated()
   cropBox = CreateListBox(0,300,75,300)
   mapBox = CreateListBox(75,300,75,300)
   cursorBox = CreateListBox(500,300,300,300)
-  map:AddPin(2,41.2,-96)
-  map:AddPin(106,200,200)
-  map:AddPin(4,41.259635,-96.023949)
+  map:PopulateFromDB()
+  --map:AddPin(2,41.2,-96)
+  --map:AddPin(106,200,200)
+  --map:AddPin(4,41.259635,-96.023949)
 end
 
-
+--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~Static functions~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+function refreshMap(category)
+  map:PopulateFromDB(category)
+end
 
 --~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~Mouse functions~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 function onLeftMouseDown(md)
@@ -231,4 +249,20 @@ function updateBoxes(mID)
 
   mapBox:bringToFront()
   cropBox:bringToFront()
+end
+
+--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~Server functions~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+function onSQLReceived(results, id)
+  cursorBox:addItem(id)
+  if id == "getallpins" then
+    local pid = 0
+    local lat = 0
+    local long = 0
+    for i,val in pairs(results["ID"]) do
+  pid = tonumber(results["ID"][i])
+  lat = tonumber(results["Latitude"][i])
+  long = tonumber(results["Longitude"][i])
+      map:AddPin(pid, lat, long)
+    end
+  end
 end
