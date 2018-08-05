@@ -100,8 +100,8 @@ function Page:setAddProblemPage(y)
   self.elements.description:setText("Description"); self.elements.description:setMultiLine(true)
   local lat = script:triggerFunction("droppedPinLat", "Scripts/map.lua")
   local long = script:triggerFunction("droppedPinLong", "Scripts/map.lua")
-  self.elements.latitude:setText(tostring(lat))
-  self.elements.longitude:setText(tostring(long))
+  self.elements.latitude:setText(string.format("%.8f", lat))
+  self.elements.longitude:setText(string.format("%.8f", long))
 
   self.elements.category:addItem("Maintanence")
   self.elements.category:addItem("Hazard")
@@ -213,10 +213,10 @@ function Page:refreshViewPage()
   local selected = self.elements.proFilter:getSelected()
   if selected == ALL then
     script:triggerFunction("GetAllProblems", "Scripts/Database.lua")
-script:triggerFunction("refreshMap", "Scripts/map.lua")
+script:triggerFunction("refreshMap", "Scripts/map.lua", false)
   else
     script:triggerFunction("GetProblemsByCategory", "Scripts/Database.lua", selected)
-script:triggerFunction("refreshMap", "Scripts/map.lua", selected)
+script:triggerFunction("refreshMap", "Scripts/map.lua", false, selected)
   end
 
 end
@@ -287,8 +287,14 @@ function onButtonPressed(button)
   script:triggerFunction("Display", "Scripts/map.lua")
   if button==pages[1].elements.myIssuesButton then
     pages[1].elements.listBox:clear()
+local selected = pages[1].elements.proFilter:getSelected()
     if script:triggerFunction("getStatus", "Scripts/login.lua") then
       script:triggerFunction("ViewMyProblems", "Scripts/Database.lua", script:triggerFunction("getUserName", "Scripts/login.lua"))
+  if selected == ALL then
+        script:triggerFunction("refreshMap", "Scripts/map.lua", true)
+  else
+    script:triggerFunction("refreshMap", "Scripts/map.lua", true, selected)
+  end
     end
   end
  
@@ -315,7 +321,8 @@ function onButtonPressed(button)
           category = MISC
         end
 
-        script:triggerFunction("InsertProblem", "Scripts/Database.lua", page.elements.title:getText(), category, page.elements.description:getText(), page.elements.longitude:getText(), page.elements.latitude:getText())
+--CreateButton(page.elements.title:getText() .. "," .. category .. "," .. page.elements.description:getText() .. "," .. page.elements.latitude:getText() .. "," .. page.elements.longitude:getText(), 0, 0, 400, 400)
+        script:triggerFunction("InsertProblem", "Scripts/Database.lua", page.elements.title:getText(), category, page.elements.description:getText(), page.elements.latitude:getText(), page.elements.longitude:getText())
         if pages[1].elements.listBox:getItemCount() == 1 and pages[1].elements.listBox:getItem(0) == "No Problems Found" then pages[1].elements.listBox:clear(); end
         pages[1].elements.listBox:addItem(page.elements.title:getText())
         page:destroy()
@@ -386,12 +393,26 @@ function onLeftMouseUp(mouseID)
   togglePress(lastPressed, false)
 end
 
---~~~~~~~~~~~~~~~~~~~~Called by map~~~~~~~~~~~~~~~~~~~~~~~~~
+--~~~~~~~~~~~~~~~~~~~~Called by outide~~~~~~~~~~~~~~~~~~~~~~~~~
 function displayMapButtons()
   --CreateButton("it was called at least",0,0,100,100)
   pages[1].elements.createButton:bringToFront()
   pages[1].elements.myIssuesButton:bringToFront()
   --CreateButton("YOOOOOO!!!",0,0,100,100)
+end
+
+function refreshPinsInSelectedCategory()
+--Called by Pages' sqlReceived from Database's InsertProblem after problem is successfully submitted and uploaded to DB.
+  local selected = pages[1].elements.proFilter:getSelected()
+  if selected == ALL then
+    --CreateButton("ALL!",0,0,100,100)
+    --script:triggerFunction("GetAllProblems", "Scripts/Database.lua")
+    script:triggerFunction("refreshMap", "Scripts/map.lua", false)
+  else
+    --CreateButton("NOT ALL!",0,0,100,100)
+    --script:triggerFunction("GetProblemsByCategory", "Scripts/Database.lua", selected)
+    script:triggerFunction("refreshMap", "Scripts/map.lua", false, selected)
+  end
 end
 
 ------------------Element Events----------------------------
@@ -415,7 +436,10 @@ end
 function onSQLReceived(results, id)
   if id == "gettitlefromid" then
     displayProblemFromTitle(results["Title"][1])
+  elseif id == "submitproblem" then
+    refreshPinsInSelectedCategory()
   end
+
   if id == "allProblems" or id == "CategoricalProb" then
     if operations:arraySize(results) == 0 then
       pages[1].elements.listBox:clear()

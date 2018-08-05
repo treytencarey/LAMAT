@@ -6,7 +6,7 @@ function NewPin(id, lat, long)
   self.lat = lat
   self.long = long
   
-  self.pin = CreateButton("",0,0,30,30)
+  self.pin = CreateButton("",0,0,32,32)
   self.pin:setImage("UI/pin.png")
   
   function self:updateLocation(screeny, screenx)
@@ -38,7 +38,7 @@ function NewMap()
   --pins
   self.pins = {}
   self.pinDropped = false
-  self.droppedPin = CreateImage("UI/tack.png", 0, 0, 30, 30)
+  self.droppedPin = CreateImage("UI/tack.png", 0, 0, 90, 45)
   self.dpLat, self.dpLong = -95.9, 41.25
   
   --zoom
@@ -53,18 +53,36 @@ function NewMap()
   self.map:setMovable(false)
   
 --~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~Map front-end functions~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-  function self:PopulateFromDB(category)
+  function self:PopulateFromDB(myProblems, category)
   
     for i,v in pairs(self.pins) do
   self.pins[i].pin:remove()
   self.pins[i]=nil
 end
+
+local cmd = "select ID, Latitude, Longitude from Problem"
+local usr = script:triggerFunction("getUserName", "Scripts/login.lua")
+local arg1 = myProblems == true
+local arg2 = category ~= nil
   
-    if category == nil then
-  server:getSQL("database/database.db", "select ID, Latitude, Longitude from Problem", "getallpins")
-else
-      server:getSQL("database/database.db", "select ID, Latitude, Longitude from Problem where Category = " .. category, "getallpins")
+    if arg1 or arg2 then
+      cmd = cmd .. " where "
+    if arg1 then
+    cmd = cmd .. "Account = '" .. usr .. "'"
+  end
+  
+  if arg1 and arg2 then
+    cmd = cmd .. " and "
+  end
+  
+      if arg2 then
+    cmd = cmd .. "Category = " .. category
+  end
 end
+
+--server:getSQL("database/database.db", "select ID, Latitude, Longitude from Problem where Category = " .. category, "getallpins")
+server:getSQL("database/database.db", cmd, "getallpins")
+
   end
   
   function self:AddPin(id, lat, long)
@@ -82,11 +100,14 @@ newPin:updateLocation(screenx, screeny)
     for pid, prob in pairs(self.pins) do
   local p = self.pins[pid]
   local screeny, screenx = self:gpsToScreen(p.lat, p.long)
+  --Exact location the pin is stuck to
+  local ppx = p.pin:getX() + p.pin:getWidth() / 2
+  local ppy = p.pin:getY() + p.pin:getHeight()
   p:updateLocation(screenx, screeny)
-  p.pin:setVisible(p.pin:getX() > self.x and
-                   p.pin:getX() < (self.x + self.w) and
-   p.pin:getY() > self.y and
-   p.pin:getY() < (self.y + self.h)
+  p.pin:setVisible(ppx > self.x and
+                   ppx < (self.x + self.w) and
+   ppy > self.y and
+   ppy < (self.y + self.h)
   )
   p.pin:bringToFront()
   cursorBox:addItem(pid .. ": " .. screenx .. ", " .. screeny)
@@ -140,6 +161,11 @@ cursorBox:addItem("it worked")
   end
   
 --~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~Map back-end functions~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+  function self:hovering(mID)
+    return mouse:inRect(self.x, self.y, self.w, self.h, true, mID)
+    --return false
+  end
 
   function self:getSpan()
   --Returns the span of latitude and longitude
@@ -201,7 +227,8 @@ self.yf = mouse:getY(mID)
   end
   
   function self:setParent(parent)
-    parent:addElement(self.map)
+    --parent:addElement(self.map)
+--parent:removeElement(self.map)
 self.map:bringToFront()
   end
   
@@ -225,8 +252,8 @@ function onCreated()
 end
 
 --~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~Static functions~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-function refreshMap(category)
-  map:PopulateFromDB(category)
+function refreshMap(myProblems, category)
+  map:PopulateFromDB(myProblems, category)
 end
 
 function droppedPinLat()
@@ -248,7 +275,8 @@ end
 
 --~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~Mouse functions~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 function onLeftMouseDown(md)
-  if mouse:getElement(md) == map.map then
+  --if mouse:getElement(md) == map.map then
+  if map:hovering(md) then
     mDown = true
     map:setPressXY(md)
     map:updateMaxCrop()
@@ -263,7 +291,7 @@ local elem = map:getPressedPin(mu)
 if elem ~= nil then
   cursorBox:addItem(elem.id)
   script:triggerFunction("displayProblem", "Scripts/Pages.lua", elem.id)
-elseif mouse:getElement(mu) == map.map then
+elseif mouse:getElement(mu) == map.map or mouse:getElement(mu) == map.droppedPin then
   map.dpLat, map.dpLong = map:screenToGps(mouse:getX(mu), mouse:getY(mu))
   --Update dropped pin
   local dpy, dpx = map:gpsToScreen(map.dpLat, map.dpLong)

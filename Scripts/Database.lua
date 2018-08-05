@@ -22,19 +22,43 @@ function Database:UpdateProblem(Title,Description)
   )
 end
 function Database:InsertProblem(Title, Category, Description, Latitude, Longitude)
+
+  --CreateButton("before command is sent", 0,0, 100,100)
   loggedIn = script:triggerFunction("getStatus", "Scripts/login.lua")
   if loggedIn == nil or loggedIn == false then return; end
   userName = script:triggerFunction("getUserName", "Scripts/login.lua")
 
+  --CreateButton("middle of command", 0,0, 100,100)
   Title = formatLiterals(Title)
+  --CreateButton("title fine", 0,0, 100,100)
+  Category = Category .. ""
   Category = formatLiterals(Category)
+  --Category = "1"
+  --CreateButton("category fine", 0,0, 100,100)
   Description = formatLiterals(Description)
+  --CreateButton("description fine", 0,0, 100,100)
   Latitude = formatLiterals(Latitude)
   Longitude = formatLiterals(Longitude)
+  
+  cmd = "insert into Problem ( Account, Title, Category, Description, Latitude, Longitude) values ('"
+  cmd = cmd .. userName
+  cmd = cmd .. "', '"
+  cmd = cmd .. Title
+  cmd = cmd .. "', '"
+  cmd = cmd .. Category
+  cmd = cmd .. "','"
+  cmd = cmd .. Description
+  cmd = cmd .. "', '"
+  cmd = cmd .. Latitude
+  cmd = cmd .. "','"
+  cmd = cmd .. Longitude
+  cmd = cmd .. "');"
 
-  server:getSQL(self.dbFile,
-    "insert into Problem ( Account, Title, Category, Description, Latitude, Longitude) values ('" .. userName .. "', '" .. Title .. "', '" .. Category .. "','" .. Description .. "', '" .. Latitude  .. "','" .. Longitude .. "');"
-  )
+  --CreateButton("before command", 0,0, 100,100)
+  server:getSQL(self.dbFile, cmd, "submitproblem")
+  
+  --yee = CreateEditBox(0,0, 200, 50)
+  --yee:setText(cmd)
 end
 
 function Database:GetAllProblems()
