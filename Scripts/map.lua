@@ -1,18 +1,39 @@
 --~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~Pin~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-function NewPin(id, lat, long)
+function NewPin(id, tit, lat, long)
   local self = {}
 
   self.id = id
+  self.tit = tit
   self.lat = lat
   self.long = long
   
   self.pin = CreateButton("",0,0,32,32)
   self.pin:setImage("UI/pin.png")
   
+  self.title = CreateText("", 0,0,50,20)
+  self.title:setWordWrap(false)
+  
   function self:updateLocation(screeny, screenx)
     self.pin:setX(screenx - self.pin:getWidth() / 2)
 self.pin:setY(screeny - self.pin:getHeight())
+self.title:setX(screenx - self.title:getTextWidth() / 2)
+self.title:setY(screeny)
   end
+  
+  function self:setVisible(visible)
+    self.pin:setVisible(visible)
+self.title:setVisible(visible)
+  end
+  
+  function self:setPreviewTitle(title)
+    local shortTitle = title
+    if string.len(title) > 15 then
+  shortTitle = string.sub(title,1,12) .. "..."
+end
+self.title:setText(shortTitle)
+  end
+  
+  self:setPreviewTitle(self.tit)
 
   return self
 end
@@ -60,13 +81,15 @@ function NewMap()
   self.pins[i]=nil
 end
 
-local cmd = "select ID, Latitude, Longitude from Problem"
+local cmd = "select ID, Title, Latitude, Longitude from Problem"
 local usr = script:triggerFunction("getUserName", "Scripts/login.lua")
 local arg1 = myProblems == true
 local arg2 = category ~= nil
   
     if arg1 or arg2 then
+
       cmd = cmd .. " where "
+  
     if arg1 then
     cmd = cmd .. "Account = '" .. usr .. "'"
   end
@@ -80,14 +103,14 @@ local arg2 = category ~= nil
   end
 end
 
---server:getSQL("database/database.db", "select ID, Latitude, Longitude from Problem where Category = " .. category, "getallpins")
+--server:getSQL("database/database.db", "select ID, Title, Latitude, Longitude from Problem where Category = " .. category, "getallpins")
 server:getSQL("database/database.db", cmd, "getallpins")
 
   end
   
-  function self:AddPin(id, lat, long)
+  function self:AddPin(id, tit, lat, long)
   --Sticks a pin on the map and adds it to the pins table.
-    local newPin = NewPin(id,lat,long)
+    local newPin = NewPin(id,tit,lat,long)
 self.map:addElement(newPin)
 local screeny, screenx = self:gpsToScreen(lat, long)
 newPin:updateLocation(screenx, screeny)
@@ -104,7 +127,7 @@ newPin:updateLocation(screenx, screeny)
   local ppx = p.pin:getX() + p.pin:getWidth() / 2
   local ppy = p.pin:getY() + p.pin:getHeight()
   p:updateLocation(screenx, screeny)
-  p.pin:setVisible(ppx > self.x and
+  p:setVisible(ppx > self.x and
                    ppx < (self.x + self.w) and
    ppy > self.y and
    ppy < (self.y + self.h)
@@ -120,14 +143,17 @@ self.droppedPin:setY(dpx)
 
   end
 
-  function self:Pan(pos)
+  function self:Pan(screenx, screeny)
   --Moves the map within its bounds to the mouse.
-local difx = mouse:getX(pos) - self.xi
-local dify = mouse:getY(pos) - self.yi
+local difx = screenx - self.xi
+local dify = screeny - self.yi
 local panx = self.cxi - difx
 local pany = self.cyi - dify
 
 --bound x
+
+panx, pany = self:getInBounds(panx, pany)
+--[
 if panx < 0 then
   panx = 0
 elseif panx > self.maxCropX then
@@ -140,15 +166,45 @@ if pany < 0 then
 elseif pany > self.maxCropY then
   pany = self.maxCropY
 end
+--]
 
 self.map:crop(panx, pany, self.w, self.h)
   end
   
+  gpsBox = CreateListBox(0,0, 150, 200)
+  
   function self:Zoom(z)
   --Swaps map images.
     self.zoom = z
+
+gpsBox:clear()
+--center of map
+local xCenter = self.x + self.w/2
+local yCenter = self.y + self.h/2
+--before center's gps
+local lati, longi = self:screenToGps(xCenter, yCenter)
+gpsBox:addItem("bfr zm")
+gpsBox:addItem(xCenter .. ", " .. yCenter)
+gpsBox:addItem("scrn aftr zm")
     self.map:setImage("Map/omaha_zoom" .. self.zoom .. ".png")
 self.map:setScaleImage(false)
+self:updateMaxCrop()
+--now get it as screenspace after zoom
+local xi, yi = self:gpsToScreen(lati, longi)
+gpsBox:addItem(xi .. ", " .. yi)
+--center of map
+local xDif = xi - xCenter
+local yDif = yi - yCenter
+gpsBox:addItem("scrn dif")
+gpsBox:addItem(xDif .. ", " .. yDif)
+gpsBox:addItem("pan to")
+gpsBox:addItem(xCenter + xDif .. ", " .. yCenter + yDif)
+
+local cropxi, cropyi = self.map:getCrop()
+local cropxf, cropyf = self:getInBounds(cropxi + xDif, cropyi + yDif)
+self.map:crop(cropxf, cropyf, self.w, self.h)
+
+self:UpdatePinLocations()
   end
   
   function self:Display()
@@ -160,7 +216,26 @@ script:triggerFunction("displayMapButtons", "Scripts/Pages.lua")
 cursorBox:addItem("it worked")
   end
   
+  
 --~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~Map back-end functions~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+  function self:getInBounds(screenx, screeny)
+    local inx, iny = screenx, screeny
+  if inx < 0 then
+  inx = 0
+elseif inx > self.maxCropX then
+  inx = self.maxCropX
+end
+
+--bound y
+if iny < 0 then
+  iny = 0
+elseif iny > self.maxCropY then
+  iny = self.maxCropY
+end
+return inx, iny
+
+  end
 
   function self:hovering(mID)
     return mouse:inRect(self.x, self.y, self.w, self.h, true, mID)
@@ -307,7 +382,7 @@ end
 function onMouseMoved(mm)
   if mDown then
     mDrag = true
-    map:Pan(mm)
+    map:Pan(mouse:getX(mm), mouse:getY(mm))
 map:UpdatePinLocations()
     updateBoxes(mm)
 local testLat, testLong = map:screenToGps(mouse:getX(mm), mouse:getY(mm))
@@ -365,13 +440,15 @@ function onSQLReceived(results, id)
   cursorBox:addItem(id)
   if id == "getallpins" then
     local pid = 0
+local tit = ""
     local lat = 0
     local long = 0
     for i,val in pairs(results["ID"]) do
   pid = tonumber(results["ID"][i])
+  tit = results["Title"][i]
   lat = tonumber(results["Latitude"][i])
   long = tonumber(results["Longitude"][i])
-      map:AddPin(pid, lat, long)
+      map:AddPin(pid, tit, lat, long)
     end
   end
 end
