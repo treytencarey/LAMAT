@@ -1,5 +1,14 @@
+--[[ \class Page
+-- \brief Creates a page UI that can display information.
+--]]
+
 local Page = {}
 local MISC, MAINT, HAZARD, AESTH, ALL = 0, 1, 2, 3, 4
+--[[
+-- \brief Creates a new page object.
+-- \mod Page()
+-- \return A new page object.
+--]]
 function Page.new()
   local o = {}
   o.currPage=""
@@ -9,6 +18,10 @@ function Page.new()
   return o
 end
 
+--[[
+-- \brief Formats the page's children if needed, so they are properly styled.
+-- \mod void formationElements()
+--]]
 function Page:formatElements()
   if self.elements.menu ~= nil then
     if self.elements.overlay ~= nil then
@@ -31,6 +44,12 @@ function Page:formatElements()
   end
 end
 
+--[[
+-- \brief Sets the page as a view [list of] problems page.
+--
+--    Creates elements and formats them onto the page to view a list of all problems and buttons like logging in, refreshing the list, etc.
+-- \mod void setViewPage()
+--]]
 function Page:setViewPage()
   self:destroy()
 
@@ -78,6 +97,12 @@ function Page:setViewPage()
     self.elements.listBox:bringToFront()
 end
 
+--[[
+-- \brief Sets the page as a create new problem page.
+--
+--    Creates elements and formats them onto the page to add a new problem.
+-- \mod void setAddProblemPage()
+--]]
 function Page:setAddProblemPage(y)
   self:destroy()
 
@@ -115,6 +140,14 @@ function Page:setAddProblemPage(y)
   self.elements.cancelButton:bringToFront()
 end
 
+--[[
+-- \brief Sets the view problem page's description, if it is a view problem page.
+--
+--    Sets the view problem page's description and attaches a scrollbar if the description exceeds the page's description size.
+--    If the description is updated to a smaller size, the scrollbar is removed if able.
+-- \mod void setViewProblemDescription(string description)
+-- \param The new description of the problem to view.
+--]]
 function Page:setViewProblemDescription(descr)
   self.elements.description:setText(descr);
   
@@ -135,6 +168,13 @@ function Page:setViewProblemDescription(descr)
   end
 end
 
+--[[
+-- \brief Sets whether or not the problem is editable, if the page is a view problem page.
+--
+--    Sets whether or not the problem is editable on a view problem page. If it is, we make the description field an editbox. Otherwise, the description field becomes text that cannot be modified.
+-- \mod void setViewProblemEditable(bool editable)
+-- \param Whether or not the view problem is editable.
+--]]
 function Page:setViewProblemEditable(editable)
   if editable == nil then editable = true; end
 
@@ -159,6 +199,12 @@ function Page:setViewProblemEditable(editable)
   end
 end
 
+--[[
+-- \brief Sets the page as a view problem page.
+--
+--    Creates elements and formats them onto the page to view a problem.
+-- \mod void setViewProblemPage()
+--]]
 function Page:setViewProblemPage(y)
   self:destroy()
 
@@ -197,6 +243,10 @@ function Page:setViewProblemPage(y)
   script:triggerFunction("setParent", "Scripts/vote.lua", self.elements.menu)
 end
 
+--[[
+-- \brief Destroys the page, removing all of it's elements.
+-- \mod void destroy()
+--]]
 function Page:destroy()
   script:triggerFunction("removeParent", "Scripts/vote.lua", self.elements.menu)
   script:triggerFunction("toggleVis", "Scripts/vote.lua", false)
@@ -207,18 +257,21 @@ function Page:destroy()
   self.elements = {}
 end
 
+--[[
+-- \brief Refreshes the view problems page based on the selected category.
+-- \mod void refreshViewPage()
+--]]
 function Page:refreshViewPage()
   self.elements.listBox:clear()
   
   local selected = self.elements.proFilter:getSelected()
   if selected == ALL then
     script:triggerFunction("GetAllProblems", "Scripts/Database.lua")
-script:triggerFunction("refreshMap", "Scripts/map.lua", false)
+    script:triggerFunction("refreshMap", "Scripts/map.lua", false)
   else
     script:triggerFunction("GetProblemsByCategory", "Scripts/Database.lua", selected)
-script:triggerFunction("refreshMap", "Scripts/map.lua", false, selected)
+    script:triggerFunction("refreshMap", "Scripts/map.lua", false, selected)
   end
-
 end
 
 --~~~~~~~~~~~~~~~~~Login functionality~~~~~~~~~~~~~~

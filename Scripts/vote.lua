@@ -1,3 +1,15 @@
+--[[ \class RatioBar
+-- \brief The vote system's upvote/downvote ratio bar.
+--]]
+
+--[[
+-- \brief Initializes the ratio bar for the vote system.
+-- \mod RatioBar(int x, int y, int w, int h)
+-- \param The x axis of the ratio bar.
+-- \param The y axis of the ratio bar.
+-- \param The width of the ratio bar.
+-- \param The height of the ratio bar.
+--]]
 function NewRatioBar(x, y, w, h)
   local self = {}
 
@@ -10,24 +22,44 @@ function NewRatioBar(x, y, w, h)
   self.negBar:setColor(224, 68, 37, 255)
   self.posBar = CreateImage("GLOBAL/pixel.png", x, y, w, h)
   self.posBar:setColor(131, 218, 45, 255)
-  
+
+--[[
+-- \brief Updates the ratio with a percentage.
+-- \mod void UpdateRatio(double r)
+-- \param The percentage of the ratio.
+--]] 
   function self:UpdateRatio(r)
     self.posBar:setWidth(self.w * r)
     self.percent = r
   end
   
+--[[
+-- \brief Sets the ratio bar's visibility.
+-- \mod void ToggleVis(bool nv)
+-- \param Whether or not the ratio bar is visible.
+--]]
   function self:ToggleVis(nv)
     self.negBar:setVisible(nv)
     self.posBar:setVisible(nv)
   end
 
+--[[
+-- \brief Displays the ratio bar on a parent element.
+-- \mod void setParent(element parent)
+-- \param The parent element.
+--]]
   function self:setParent(parent)
     parent:addElement(self.negBar)
     parent:addElement(self.posBar)
-self.negBar:bringToFront()
-self.posBar:bringToFront()
+    self.negBar:bringToFront()
+    self.posBar:bringToFront()
   end
 
+--[[
+-- \brief Removes the ratio bar from the parent element.
+-- \mod void removeParent(element parent)
+-- \param The parent element.
+--]]
   function self:removeParent(parent)
     parent:removeElement(self.negBar)
     parent:removeElement(self.posBar)
@@ -37,6 +69,9 @@ self.posBar:bringToFront()
 
 end
 
+--[[ \class NewButton
+-- \brief Creates a new button with an image for up/down press.
+--]]
 function NewButton(restImg, x, y, w, h)
   local self = {}
 
@@ -48,6 +83,10 @@ function NewButton(restImg, x, y, w, h)
   self.btn:setImage(self.restImg)
   self.btn:setScaleImage(true) 
 
+--[[
+-- \brief Sets the button as toggled if pressed, changing it's image.
+-- \mod void Toggle()
+--]]
   function self:Toggle()
     self.pressed = not self.pressed
     if self.pressed then
@@ -57,12 +96,21 @@ function NewButton(restImg, x, y, w, h)
     end
   end
 
+--[[
+-- \brief Resets the button if pressed, to toggle or untoggle it.
+-- \mod void Reset()
+--]]
   function self:Reset()
     if self.pressed then
       self:Toggle()
     end
   end
   
+--[[
+-- \brief Sets the button's visibility.
+-- \mod void ToggleVis(bool newVis)
+-- \param Whether or not the button is visible.
+--]]
   function self:ToggleVis(newVis)
     self.btn:setVisible(newVis)
   end
@@ -108,6 +156,14 @@ function onCreated()
   
 end
 
+--[[ \class vote
+-- \brief The vote system.
+--]]
+
+--[[
+-- \brief Moves the vote system to the top-most view.
+-- \mod static void snapToWindow()
+--]]
 function snapToWindow()
   upBtn.btn:bringToFront()
   downBtn.btn:bringToFront()
@@ -126,6 +182,11 @@ function snapToWindow()
   --]]
 end
 
+--[[
+-- \brief Sets the vote system's visibility.
+-- \mod static void toggleVis(bool show)
+-- \param Whether or not the vote system is visible.
+--]]
 function toggleVis(show)
   if ratioBar.posBar:getParent() == ratioBar.posBar then show = false; end
   if loggedin then
@@ -150,6 +211,10 @@ ratioBar:UpdateRatio(1)
   
 end
 
+--[[
+-- \brief Updates the score box's text.
+-- \mod static void updateScoreBox()
+--]]
 function updateScoreBox()
   rat = 0
   scoreText:setText(upVotes .. "/" .. allVotes)
@@ -159,6 +224,7 @@ function updateScoreBox()
   return rat
 end
 
+-- May not be necessary anymore?
 function updateProbAndAcc(pID)
   statusText:setText("Updating...")
   acc = script:triggerFunction("getUserName", "Scripts/login.lua")
@@ -178,6 +244,11 @@ probID = pID
   
 end
 
+--[[
+-- \brief Sets the vote system's parent element.
+-- \mod static void setParent(element parent)
+-- \param The parent element.
+--]]
 function setParent(parent)
   ratioBar:setParent(parent)
   parent:addElement(upBtn.btn)
@@ -191,6 +262,11 @@ function setParent(parent)
   statusText:bringToFront()
 end
 
+--[[
+-- \brief Removes the vote system from the parent.
+-- \mod static void removeParent(element parent)
+-- \param The parent element.
+--]]
 function removeParent(parent)
   ratioBar:removeParent(parent)
   parent:removeElement(upBtn.btn)
@@ -199,6 +275,13 @@ function removeParent(parent)
   parent:removeElement(statusText)
 end
 
+--[[
+-- \brief Requests the votes from the server.
+--
+--    Sends an SQL request to the server, and displays the votes in the vote system.
+-- \mod static void getVotesAndDisplay(int pID)
+-- \param The problem ID.
+--]]
 function getVotesAndDisplay(pID)
   --testBox:clear()
   updateProbAndAcc(pID)
