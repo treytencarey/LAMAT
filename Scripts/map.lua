@@ -33,6 +33,11 @@ end
 self.title:setText(shortTitle)
   end
   
+  function self:remove()
+    self.pin:remove()
+self.title:remove()
+  end
+  
   self:setPreviewTitle(self.tit)
 
   return self
@@ -77,7 +82,7 @@ function NewMap()
   function self:PopulateFromDB(myProblems, category)
   
     for i,v in pairs(self.pins) do
-  self.pins[i].pin:remove()
+  self.pins[i]:remove()
   self.pins[i]=nil
 end
 
@@ -119,7 +124,7 @@ newPin:updateLocation(screenx, screeny)
   
   function self:UpdatePinLocations()
   --Moves all the pins to match up with the newly dragged-to location.
-    cursorBox:clear()
+
     for pid, prob in pairs(self.pins) do
   local p = self.pins[pid]
   local screeny, screenx = self:gpsToScreen(p.lat, p.long)
@@ -132,12 +137,12 @@ newPin:updateLocation(screenx, screeny)
    ppy > self.y and
    ppy < (self.y + self.h)
   )
-  p.pin:bringToFront()
-  cursorBox:addItem(pid .. ": " .. screenx .. ", " .. screeny)
+  --p.pin:bringToFront()
+
     end
 --Update dropped pin
 local dpy, dpx = self:gpsToScreen(self.dpLat, self.dpLong)
-self.droppedPin:bringToFront()
+--self.droppedPin:bringToFront()
 self.droppedPin:setX(dpy)
 self.droppedPin:setY(dpx)
 
@@ -170,35 +175,25 @@ end
 
 self.map:crop(panx, pany, self.w, self.h)
   end
-  
-  gpsBox = CreateListBox(0,0, 150, 200)
+
   
   function self:Zoom(z)
   --Swaps map images.
     self.zoom = z
 
-gpsBox:clear()
 --center of map
 local xCenter = self.x + self.w/2
 local yCenter = self.y + self.h/2
 --before center's gps
 local lati, longi = self:screenToGps(xCenter, yCenter)
-gpsBox:addItem("bfr zm")
-gpsBox:addItem(xCenter .. ", " .. yCenter)
-gpsBox:addItem("scrn aftr zm")
     self.map:setImage("Map/omaha_zoom" .. self.zoom .. ".png")
 self.map:setScaleImage(false)
 self:updateMaxCrop()
 --now get it as screenspace after zoom
 local xi, yi = self:gpsToScreen(lati, longi)
-gpsBox:addItem(xi .. ", " .. yi)
 --center of map
 local xDif = xi - xCenter
 local yDif = yi - yCenter
-gpsBox:addItem("scrn dif")
-gpsBox:addItem(xDif .. ", " .. yDif)
-gpsBox:addItem("pan to")
-gpsBox:addItem(xCenter + xDif .. ", " .. yCenter + yDif)
 
 local cropxi, cropyi = self.map:getCrop()
 local cropxf, cropyf = self:getInBounds(cropxi + xDif, cropyi + yDif)
@@ -210,10 +205,10 @@ self:UpdatePinLocations()
   function self:Display()
   --Brings map and pins to front. Also calls function in Pages to bring the buttons on top of the map to the top.
     self.map:bringToFront()
+self.droppedPin:bringToFront()
 self.zoomBtn:bringToFront()
-self:UpdatePinLocations()
 script:triggerFunction("displayMapButtons", "Scripts/Pages.lua")
-cursorBox:addItem("it worked")
+self:UpdatePinLocations()
   end
   
   
@@ -301,12 +296,6 @@ self.cxi, self.cyi = map.map:getCrop()
 self.yf = mouse:getY(mID)
   end
   
-  function self:setParent(parent)
-    --parent:addElement(self.map)
---parent:removeElement(self.map)
-self.map:bringToFront()
-  end
-  
   return self
   
 end
@@ -316,9 +305,6 @@ function onCreated()
   map = NewMap()
   mDown = false
   mDrag = false
-  cropBox = CreateListBox(0,300,75,300)
-  mapBox = CreateListBox(75,300,75,300)
-  cursorBox = CreateListBox(500,300,300,300)
   map:PopulateFromDB()
   map:Display()
   --map:AddPin(2,41.2,-96)
@@ -339,13 +325,8 @@ function droppedPinLong()
   return map.dpLong
 end
 
-function setPinDropped(dropped)
-  map.pinDropped = dropped
-  map.droppedPin:setVisible(dropped)
-end
-
-function getPinDropped()
-  return map.pinDropped
+function display()
+  map:Display()
 end
 
 --~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~Mouse functions~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -364,16 +345,14 @@ function onLeftMouseUp(mu)
   if mDrag ~= true then
 local elem = map:getPressedPin(mu)
 if elem ~= nil then
-  cursorBox:addItem(elem.id)
   script:triggerFunction("displayProblem", "Scripts/Pages.lua", elem.id)
 elseif mouse:getElement(mu) == map.map or mouse:getElement(mu) == map.droppedPin then
   map.dpLat, map.dpLong = map:screenToGps(mouse:getX(mu), mouse:getY(mu))
   --Update dropped pin
   local dpy, dpx = map:gpsToScreen(map.dpLat, map.dpLong)
-  map.droppedPin:bringToFront()
+  --map.droppedPin:bringToFront()
   map.droppedPin:setX(dpy)
   map.droppedPin:setY(dpx)
-  cursorBox:addItem("pindrop!")
 end
   end
   mDrag = false
@@ -384,12 +363,7 @@ function onMouseMoved(mm)
     mDrag = true
     map:Pan(mouse:getX(mm), mouse:getY(mm))
 map:UpdatePinLocations()
-    updateBoxes(mm)
-local testLat, testLong = map:screenToGps(mouse:getX(mm), mouse:getY(mm))
-cursorBox:addItem(testLat)
-cursorBox:addItem(testLong)
   end
-  
 end
 
 function onButtonPressed(button)
@@ -402,42 +376,8 @@ end
   end
 end
 
-
---~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~Debug functions~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-function setParent(parent)
-  map:setParent(parent)
-end
-
-function updateBoxes(mID)
-  cropBox:clear()
-  mapBox:clear()
-
-  cropBox:addItem("Crop")
-  x,y,w,h = map.map:getCrop()
-  cropBox:addItem("x: " .. x)
-  cropBox:addItem("y: " .. y)
-  cropBox:addItem("w: " .. w)
-  cropBox:addItem("h: " .. h)
-  cropBox:addItem("X: " .. map.maxCropX)
-  cropBox:addItem("Y: " .. map.maxCropY)
-
-  mapBox:addItem("Map")
-  a = map.map:getX()
-  b = map.map:getY()
-  c = map.map:getWidth()
-  d = map.map:getHeight()
-  mapBox:addItem("x: " .. a)
-  mapBox:addItem("y: " .. b)
-  mapBox:addItem("w: " .. c)
-  mapBox:addItem("h: " .. d)
-
-  mapBox:bringToFront()
-  cropBox:bringToFront()
-end
-
 --~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~Server functions~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 function onSQLReceived(results, id)
-  cursorBox:addItem(id)
   if id == "getallpins" then
     local pid = 0
 local tit = ""

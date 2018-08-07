@@ -56,9 +56,10 @@ function Page:setViewPage()
   self.elements = {
     menu = CreateImage("GLOBAL/pixel.png", 0, 0, 270, 700),
 
-    loginButton = makeButton("login", 155, 25, 100, 50),
-    logoutButton = makeButton("logout", 155, 25, 100, 50),
-    credits = CreateImage("UI/credits_style3.png", 10, 25, 100, 50),
+loginStatus = CreateText("LOGGED IN STATUS",10,30,150,50),
+    loginButton = makeButton("login", 155, 30, 100, 50),
+    logoutButton = makeButton("logout", 155, 30, 100, 50),
+    --credits = CreateImage("UI/credits_style3.png", 10, 25, 100, 50),
 
     createButton = makeButton("new_problem", 25, 425, 100, 50),
     myIssuesButton = makeButton("my_probs", 145, 425, 100, 50),
@@ -84,6 +85,8 @@ function Page:setViewPage()
 
   self.elements.menu:setColor(56,56,56,255)
   self.elements.probBG:setColor(100,100,100,255)
+  self.elements.loginStatus:setColor(255,255,255,255)
+  self.elements.loginStatus:setTextAlignment("left", "center")
   self:formatElements()
   self:refreshViewPage()
 
@@ -93,8 +96,9 @@ function Page:setViewPage()
   self.elements.refreshButton:bringToFront()
   self.elements.myIssuesButton:bringToFront()
   
-  --script:triggerFunction("setParent", "Scripts/map.lua", self.elements.menu)
     self.elements.listBox:bringToFront()
+  script:triggerFunction("display", "Scripts/map.lua")
+  --displayMapButtons()
 end
 
 --[[
@@ -287,9 +291,11 @@ function updateAccess()
   if status == true then
     pages[1].elements.loginButton:setVisible(false)
     pages[1].elements.logoutButton:setVisible(true)
+pages[1].elements.loginStatus:setText("Logged in as: " .. script:triggerFunction("getUserName", "Scripts/login.lua"))
   else
     pages[1].elements.loginButton:setVisible(true)
     pages[1].elements.logoutButton:setVisible(false)
+pages[1].elements.loginStatus:setText("Not logged in")
   end
 end
 
@@ -327,6 +333,7 @@ function onCreated()
   pages = {}
   pages[1] = Page.new()
   pages[1]:setViewPage()
+  pages[1].elements.probBG:sendToBack()
 
   --ref to last button pressed so its img can be changed when pressed/released
   lastPressed = nil
@@ -337,7 +344,6 @@ end
 
 --~~~~~~~~~~~~~~~~~Mouse functions~~~~~~~~~~~~~~~~~
 function onButtonPressed(button)
-  script:triggerFunction("Display", "Scripts/map.lua")
   if button==pages[1].elements.myIssuesButton then
     pages[1].elements.listBox:clear()
 local selected = pages[1].elements.proFilter:getSelected()
