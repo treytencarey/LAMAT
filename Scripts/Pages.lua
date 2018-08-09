@@ -111,22 +111,40 @@ function Page:setAddProblemPage(y)
   self:destroy()
 
   self.elements = {
-    menu = CreateWindow("Create Problem",0,0,300,305),
+    menu = CreateImage("GLOBAL/pixel.png",0,0,270,325),
     overlay = CreateImage("GLOBAL/pixel.png",0,0,0,0),
-    title = CreateEditBox(5,45,290,30),
-    description = CreateEditBox(5,80,290,70),
-    latitude = CreateEditBox(5,155,290,30),
-    longitude = CreateEditBox(5,190,290,30),
-    category = CreateDropList(5, 15, 100, 20),
-    createButton = CreateButton("Create Problem",5,240,290,55),
-    cancelButton = makeButton("x", 250,0,50,50)
+barBG = CreateImage("GLOBAL/pixel.png", 0, 275, 270, 50),
+    descBG = CreateImage("GLOBAL/pixel.png", 0, 50, 270, 100),
+    --title = CreateEditBox("Title",0,20,270,30),
+title = CreateEditBox(10,10,250,30),
+    description = CreateEditBox(0, 50, 270, 100),
+droppedPinLbl = CreateText("Dropped pin latitude/longitude:",10,160,250,30),
+    latitude = CreateText("", 10,180,250,30),
+    longitude = CreateText("", 10,180,250,30),
+    category = CreateDropList(10, 220, 250, 20),
+    --createButton = CreateButton("Create Problem",5,240,290,55),
+createButton = makeButton("ok", 10, 270, 100, 50),
+    cancelButton = makeButton("x", 220,270,50,50)
   }
-  self.elements.createButton:setImage("UI/subbut.jpg")
-  self.elements.createButton:setScaleImage(true)
+  
+  self:formatElements()
+  
+  self.elements.menu:setColor(60,60,60,255)
+  self.elements.barBG:setColor(50,50,50,255)
+  self.elements.descBG:setColor(230,230,230,255)
+  self.elements.droppedPinLbl:setColor(255,255,255,255)
+  self.elements.latitude:setColor(255,255,255,255)
+  self.elements.longitude:setColor(255,255,255,255)
+  
+  self.elements.droppedPinLbl:setTextAlignment("center")
+  self.elements.longitude:setTextAlignment("right")
+  --self.elements.title:setColor(255,255,255,255)
 
   self.elements.menu:setMovable(); self.elements.menu:setMovableBoundaries(0-280, 0, 640+280, 480+225)
   self.elements.title:setText("Title")
-  self.elements.description:setText("Description"); self.elements.description:setMultiLine(true)
+  self.elements.description:setText("Description")
+  self.elements.description:setMultiLine(true)
+  self.elements.description:setWordWrap(true)
   local lat = script:triggerFunction("droppedPinLat", "Scripts/map.lua")
   local long = script:triggerFunction("droppedPinLong", "Scripts/map.lua")
   self.elements.latitude:setText(string.format("%.8f", lat))
@@ -138,10 +156,15 @@ function Page:setAddProblemPage(y)
   self.elements.category:addItem("Misc")
   self.elements.category:setSelected(3)
   
-  --script:triggerFunction("setParent", "Scripts/map.lua", self.elements.menu)
-
-  self:formatElements()
+  self.elements.barBG:bringToFront()
+  self.elements.descBG:bringToFront()
+  self.elements.title:bringToFront()
+  self.elements.description:bringToFront()
+  self.elements.latitude:bringToFront()
+  self.elements.longitude:bringToFront()
+  self.elements.createButton:bringToFront()
   self.elements.cancelButton:bringToFront()
+  
 end
 
 --[[
@@ -195,11 +218,13 @@ function Page:setViewProblemEditable(editable)
     self.elements.description:setMultiLine(true)
     self.elements.description:setWordWrap(true)
     self.elements.menu:addElement(self.elements.description)
+self.elements.updateButton:setVisible(true)
   else
     self.elements.description = CreateText("",0,0,270,100);
     self.elements.descriptionScrollBar = CreateScrollBar(false,0,0,15,100); self.elements.descriptionScrollBar:setX(self.elements.description:getWidth() - self.elements.descriptionScrollBar:getWidth()); self.elements.descriptionScrollBar:hide()
     self.elements.descBG:addElement(self.elements.descriptionScrollBar)
     self.elements.descBG:addElement(self.elements.description)
+self.elements.updateButton:setVisible(false)
   end
 end
 
