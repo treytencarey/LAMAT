@@ -50,11 +50,58 @@ function testCreateProblem()
   modal.elements.longitude:setText("0")
   script:triggerFunction("onButtonPressed", "Scripts/Pages.lua", modal.elements.createButton)
 
-  testViewProblem(listBoxHasItem(pages[1].elements.listBox, "Test #" .. tostring(testNo-1)))
+  local testName = "Test #" .. tostring(testNo-1)
+  testViewProblem(listBoxHasItem(pages[1].elements.listBox, testName))
+
+  return testName
 end
 
 function onCreated()
-  --testLogin()
+  onTest = -1
+end
 
-  testCreateProblem()
+function appendTestOutput(cont)
+  fileCont = ""
+  if operations:fileExists("outputTest.txt") then
+    fileCont = operations:readFile("outputTest.txt")
+  end
+  fileCont = fileCont .. cont .. "\n"
+  operations:writeFile("outputTest.txt", fileCont)
+end
+
+function main()
+  if onTest == 1 then
+
+    operations:writeFile("outputTest.txt", "") -- Clear the test output
+    testLogin()
+    time = game:getTime()
+    onTest = onTest+1
+
+  elseif onTest == 2 then
+
+    loginStatus = script:triggerFunction("getStatus", "Scripts/login.lua")
+    if loginStatus == true then
+      appendTestOutput("Login test successful!")
+      testProbTitle = testCreateProblem()
+      time = game:getTime()
+      onTest = onTest+1
+    elseif time < game:getTime() - 10000 then -- Took longer than 10 seconds to log in. Failed.
+      appendTestOutput("Login test failed.")
+      onTest = -1 -- Stop testing. Failed.
+    end
+
+  elseif onTest == 3 then
+
+    topModal = script:triggerFunction("getTopModal", "Scripts/Pages.lua")
+    if topModal ~= nil and topModal.elements.title:getText() == testProbTitle then
+      appendTestOutput("Create problem successful!")
+      appendTestOutput("View problem successful!")
+      onTest = onTest+1
+    elseif time < game:getTime()-10000 then -- Took longer than 10 seconds to create and view problem. Failed.
+      appendTestOutput("Create problem failed.")
+      appendTestOutput("View problem failed.")
+      onTest = -1 -- Stop testing. Failed.
+    end
+
+  end
 end
