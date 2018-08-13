@@ -33,7 +33,8 @@ function NewPin(id, tit, lat, long)
       shortTitle = string.sub(title,1,12) .. "..."
     end
     self.title:setText(shortTitle)
-self.title:setWidth(self.title:getTextWidth())
+    self.title:setWidth(self.title:getTextWidth())
+    self.title:setHeight(self.title:getTextHeight())
   end
   
   function self:remove()
